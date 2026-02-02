@@ -32,23 +32,42 @@ public class Presentation {
             Screen screen = new TerminalScreen(terminal);
             screen.startScreen();
 
+            // Показываем приветствие
+            ScreenManager.renderStartScreen(screen);
+
             while (true) {
-                // Передаём данные в Screen для отрисовки
-                ScreenManager.renderRoom(
-                        screen,
-                        Controller.getPlayerX(),
-                        Controller.getPlayerY(),
-                        Controller.isShowingMenu(),
-                        Controller.getCurrentMenuType(),
-                        Controller.getCurrentMenuItems()
-                );
+                // Обработка состояний
+                switch (Controller.getCurrentState()) {
+                    case START_SCREEN:
+                        ScreenManager.renderStartScreen(screen);
+                        break;
+                    case MENU_SCREEN:
+                        ScreenManager.menuScreen(screen, Controller.getCurrentMenuLine());
+                        break;
+                    case GAME_SCREEN:
+                        ScreenManager.renderRoom(
+                                screen,
+                                Controller.getPlayerX(),
+                                Controller.getPlayerY(),
+                                Controller.isShowingMenu(),
+                                Controller.getCurrentMenuType(),
+                                Controller.getCurrentMenuItems()
+                        );
+                        break;
+                    case DEAD_SCREEN:
+                        ScreenManager.deadScreen(screen);
+                        break;
+                    case ENDGAME_SCREEN:
+                        ScreenManager.endgameScreen(screen);
+                        break;
+                }
 
                 screen.refresh();
 
                 KeyStroke key = screen.readInput();
                 if (key == null) continue;
 
-                if (key.getKeyType() == KeyType.Escape) {
+                if (key.getKeyType() == KeyType.Escape && Controller.getCurrentState() != Controller.GameState.START_SCREEN) {
                     break;
                 }
 

@@ -9,6 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Controller {
+    public enum GameState {
+        START_SCREEN,
+        MENU_SCREEN,
+        GAME_SCREEN,
+        DEAD_SCREEN,
+        ENDGAME_SCREEN
+    }
+    private static GameState currentState = GameState.START_SCREEN;
+    private static int currentMenuLine = 0;
 
     private static int playerX = 5;
     private static int playerY = 5;
@@ -24,19 +33,40 @@ public class Controller {
     private static List<String> currentMenuItems = new ArrayList<>();
 
     public static void handleInput(KeyStroke key, Screen screen) throws IOException {
-        if (key.getKeyType() == KeyType.Escape) {
-            return; // Выход из игры handled in Presentation
+        switch (currentState) {
+            case START_SCREEN:
+                currentState = GameState.MENU_SCREEN;
+                break;
+            case MENU_SCREEN:
+                handleMenuNavigation(key, screen);
+                break;
+            case GAME_SCREEN:
+                handleGameInput(key, screen);
+                break;
+            case DEAD_SCREEN:
+                currentState = GameState.MENU_SCREEN;
+                break;
+            case ENDGAME_SCREEN:
+                currentState = GameState.MENU_SCREEN;
+                break;
         }
+    }
 
-        if (showingMenu) {
-            handleMenuInput(key, screen);
-        } else {
-            handleGameInput(key, screen);
+    private static void handleMenuNavigation(KeyStroke key, Screen screen) {
+        if (key.getKeyType() == KeyType.ArrowUp) {
+            currentMenuLine = Math.max(0, currentMenuLine - 1);
+        } else if (key.getKeyType() == KeyType.ArrowDown) {
+            currentMenuLine = Math.min(3, currentMenuLine + 1);
+        } else if (key.getKeyType() == KeyType.Enter) {
+            if (currentMenuLine == 0) { // NEW GAME
+                currentState = GameState.GAME_SCREEN;
+                resetGame();
+            } else if (currentMenuLine == 3) { // EXIT
+                System.exit(0);
+            }
+        } else if (key.getKeyType() == KeyType.Escape) {
+            System.exit(0);
         }
-
-        // Ограничиваем игрока в пределах комнаты
-        playerX = Math.max(0, Math.min(playerX, 9));
-        playerY = Math.max(0, Math.min(playerY, 9));
     }
 
     private static void handleGameInput(KeyStroke key, Screen screen) {
@@ -61,6 +91,13 @@ public class Controller {
                     openMenu("scroll", scrollItems);
                 }
                 break;
+        }
+        // Хаки для теста
+        if (playerX == 0 && playerY == 0) { // Умер
+            currentState = GameState.DEAD_SCREEN;
+        }
+        if (playerX == ScreenManager.ROOM_WIDTH - 1 && playerY == ScreenManager.ROOM_HEIGHT - 1) { // Победил
+            currentState = GameState.ENDGAME_SCREEN;
         }
     }
 
@@ -95,10 +132,20 @@ public class Controller {
         currentMenuItems.clear();
     }
 
-    // Геттеры для Screen
+    private static void resetGame() {
+        playerX = 5;
+        playerY = 5;
+        showingMenu = false;
+        currentMenuType = "";
+        currentMenuItems.clear();
+    }
+
+    // Геттеры
+    public static GameState getCurrentState() { return currentState; }
     public static int getPlayerX() { return playerX; }
     public static int getPlayerY() { return playerY; }
     public static boolean isShowingMenu() { return showingMenu; }
     public static String getCurrentMenuType() { return currentMenuType; }
     public static List<String> getCurrentMenuItems() { return currentMenuItems; }
+    public static int getCurrentMenuLine() { return currentMenuLine; }
 }

@@ -3,6 +3,7 @@ package presentation;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
+//import domain.LeaderboardService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,7 +15,8 @@ public class Controller {
         MENU_SCREEN,
         GAME_SCREEN,
         DEAD_SCREEN,
-        ENDGAME_SCREEN
+        ENDGAME_SCREEN,
+        SCOREBOARD_SCREEN
     }
     private static GameState currentState = GameState.START_SCREEN;
     private static int currentMenuLine = 0;
@@ -31,8 +33,14 @@ public class Controller {
     private static boolean showingMenu = false;
     private static String currentMenuType = "";
     private static List<String> currentMenuItems = new ArrayList<>();
+    //private static LeaderboardService leaderboardService = new FileLeaderboardService(); // Реализация разработчика А
 
     public static void handleInput(KeyStroke key, Screen screen) throws IOException {
+        // Обработка ESC для возврата в меню из любого состояния, кроме START_SCREEN
+        if (key.getKeyType() == KeyType.Escape && currentState != GameState.START_SCREEN) {
+            currentState = GameState.MENU_SCREEN;
+            return; // Прерываем дальнейшую обработку
+        }
         switch (currentState) {
             case START_SCREEN:
                 currentState = GameState.MENU_SCREEN;
@@ -42,6 +50,11 @@ public class Controller {
                 break;
             case GAME_SCREEN:
                 handleGameInput(key, screen);
+                break;
+            case SCOREBOARD_SCREEN:
+                if (key.getKeyType() == KeyType.Escape) {
+                    currentState = GameState.MENU_SCREEN;
+                }
                 break;
             case DEAD_SCREEN:
                 currentState = GameState.MENU_SCREEN;
@@ -53,24 +66,35 @@ public class Controller {
     }
 
     private static void handleMenuNavigation(KeyStroke key, Screen screen) {
-        if (key.getKeyType() == KeyType.ArrowUp) {
+        if (key.getCharacter() == 'w' || key.getCharacter() == 'W') {
             currentMenuLine = Math.max(0, currentMenuLine - 1);
-        } else if (key.getKeyType() == KeyType.ArrowDown) {
+        } else if (key.getCharacter() == 's' || key.getCharacter() == 'S') {
             currentMenuLine = Math.min(3, currentMenuLine + 1);
         } else if (key.getKeyType() == KeyType.Enter) {
             if (currentMenuLine == 0) { // NEW GAME
                 currentState = GameState.GAME_SCREEN;
-                resetGame();
+                resetGame();                
+            } else if (currentMenuLine == 1) { // LOAD GAME
+                //currentState = GameState.
+            } else if (currentMenuLine == 2) { // SCOREBOARD
+                currentState = GameState.SCOREBOARD_SCREEN;
             } else if (currentMenuLine == 3) { // EXIT
                 System.exit(0);
             }
         } else if (key.getKeyType() == KeyType.Escape) {
-            System.exit(0);
+            //currentState = GameState.MENU_SCREEN;
         }
     }
 
     private static void handleGameInput(KeyStroke key, Screen screen) {
+        if (showingMenu) {
+            handleMenuInput(key, screen);
+            return; // Не обрабатываем движение, пока меню открыто
+        }
         switch (key.getKeyType()) {
+            case Escape: // Если esc, выходим в меню
+                currentState = GameState.MENU_SCREEN;
+                return;
             case Character:
                 char c = key.getCharacter();
                 if (c == 'w' || c == 'W') playerY--;

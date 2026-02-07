@@ -73,7 +73,7 @@ public class Presentation {
                     ScreenManager.menuScreen(screen, Controller.getCurrentMenuLine());
                     break;
                 case GAME_SCREEN:
-                    ScreenManager.renderRoom(
+                    ScreenManager.renderLevel(
                             screen,
                             Controller.getPlayerX(),
                             Controller.getPlayerY(),

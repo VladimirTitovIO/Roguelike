@@ -5,6 +5,9 @@ import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
+import domain.DungeonLevel;
+import domain.DungeonLevel.Position;
+import domain.GameMap.TileType;
 import domain.ScoreEntry;
 
 import java.io.IOException;
@@ -12,8 +15,9 @@ import java.util.List;
 
 public class ScreenManager {
 
-    public static final int ROOM_WIDTH = 10;
-    public static final int ROOM_HEIGHT = 10;
+    public static final int LEVEL_WIDTH = DungeonLevel.WIDTH;
+    public static final int LEVEL_HEIGHT = DungeonLevel.HEIGHT;
+    public static final int VIEW_RADIUS = Controller.VIEW_RADIUS;
 
     // Экраны
 
@@ -115,27 +119,82 @@ public class ScreenManager {
 
     // Игровой экран
 
-    public static void renderRoom(Screen screen, int playerX, int playerY, boolean showingMenu,
-                                  String currentMenuType, List<String> currentMenuItems) {
+    public static void renderLevel(Screen screen, int playerX, int playerY, boolean showingMenu,
+                                   String currentMenuType, List<String> currentMenuItems) throws IOException {
         TextGraphics graphics = screen.newTextGraphics();
 
         // Очистка экрана
         screen.clear();
 
-        // Рисуем стены (рамка)
-        for (int x = 0; x < ROOM_WIDTH; x++) {
-            graphics.setCharacter(x, 0, '#');
-            graphics.setCharacter(x, ROOM_HEIGHT - 1, '#');
-        }
-        for (int y = 0; y < ROOM_HEIGHT; y++) {
-            graphics.setCharacter(0, y, '#');
-            graphics.setCharacter(ROOM_WIDTH - 1, y, '#');
+        DungeonLevel level = Controller.getCurrentLevel();
+
+        // Рисуем карту с учётом тумана войны
+        for (int y = 0; y < LEVEL_HEIGHT; y++) {
+            for (int x = 0; x < LEVEL_WIDTH; x++) {
+                TileType tile = level.getTile(x, y);
+
+                boolean isSeen = Controller.isExplored(x, y); // уже исследовано?
+                boolean isVisibleNow = Controller.isCurrentlyVisible(x, y); // видно прямо сейчас?
+
+                if (isVisibleNow) {
+                    // Видим — рисуем
+                    switch (tile) {
+                        case WALL:
+                            graphics.setForegroundColor(TextColor.ANSI.WHITE);
+                            graphics.setCharacter(x, y, '#');
+                            break;
+                        case FLOOR:
+                            graphics.setForegroundColor(TextColor.ANSI.GREEN);
+                            graphics.setCharacter(x, y, '.');
+                            break;
+                        case CORRIDOR:
+                            graphics.setForegroundColor(TextColor.ANSI.YELLOW);
+                            graphics.setCharacter(x, y, '.');
+                            break;
+                        case DOOR:
+                            Position pos = new Position(x, y);
+                            var door = level.getDoors().get(pos);
+                            if (door != null) {
+                                if (door.locked) {
+                                    graphics.setForegroundColor(getDoorColor(door.color));
+                                    graphics.setCharacter(x, y, 'D'); // или '🔒'
+                                } else {
+                                    graphics.setForegroundColor(TextColor.ANSI.CYAN);
+                                    graphics.setCharacter(x, y, '+');
+                                }
+                            } else {
+                                graphics.setForegroundColor(TextColor.ANSI.CYAN);
+                                graphics.setCharacter(x, y, '+');
+                            }
+                            break;
+                        default:
+                            graphics.setForegroundColor(TextColor.ANSI.WHITE);
+                            graphics.setCharacter(x, y, '?');
+                    }
+                } else if (isSeen) {
+                    // Исследовано, но не видно сейчас — рисуем только стены
+                    if (tile == TileType.WALL) {
+                        graphics.setForegroundColor(TextColor.ANSI.WHITE);
+                        graphics.setCharacter(x, y, '#');
+                    } else {
+                        // Не стена — рисуем тёмно (как "затемнённое" пространство)
+                        graphics.setForegroundColor(TextColor.ANSI.BLACK);
+                        graphics.setCharacter(x, y, ' ');
+                    }
+                } else {
+                    // Не исследовано — чёрный фон
+                    graphics.setForegroundColor(TextColor.ANSI.BLACK);
+                    graphics.setCharacter(x, y, ' ');
+                }
+            }
         }
 
-        // Рисуем пол
-        for (int y = 1; y < ROOM_HEIGHT - 1; y++) {
-            for (int x = 1; x < ROOM_WIDTH - 1; x++) {
-                graphics.setCharacter(x, y, '.');
+        // Рисуем ключи (если они видны)
+        for (var entry : level.getKeysOnGround().entrySet()) {
+            Position pos = entry.getKey();
+            if (Controller.isVisible(pos.x, pos.y)) {
+                graphics.setForegroundColor(getKeyColor(entry.getValue()));
+                graphics.setCharacter(pos.x, pos.y, 'K'); // или '🔑'
             }
         }
 
@@ -143,7 +202,7 @@ public class ScreenManager {
         graphics.setForegroundColor(TextColor.ANSI.WHITE);
         graphics.setCharacter(playerX, playerY, '@');
 
-        // Рисуем UI-панель справа
+        // Рисуем UI-панель
         drawUIPanel(graphics);
 
         // Если меню открыто — рисуем его поверх
@@ -153,32 +212,49 @@ public class ScreenManager {
 
         // Подсказка
         graphics.putString(1, 38, "WASD to move | J/K/H/E to use items | ESC to quit");
+        screen.refresh();
+    }
+
+    private static TextColor getDoorColor(DungeonLevel.DoorColor color) {
+        return switch (color) {
+            case RED -> TextColor.ANSI.RED;
+            case BLUE -> TextColor.ANSI.BLUE;
+            case YELLOW -> TextColor.ANSI.YELLOW;
+        };
+    }
+
+    private static TextColor getKeyColor(DungeonLevel.DoorColor color) {
+        return switch (color) {
+            case RED -> TextColor.ANSI.RED_BRIGHT;
+            case BLUE -> TextColor.ANSI.BLUE_BRIGHT;
+            case YELLOW -> TextColor.ANSI.YELLOW_BRIGHT;
+        };
     }
 
     private static void drawUIPanel(TextGraphics graphics) {
-        int X = 120;
-        int Y = 1;
+        int x = LEVEL_WIDTH + 2;
+        int y = 1;
         //int fieldSize = 20;
-        graphics.putString(X, Y++, "LVL: 1");
-        graphics.putString(X, Y++, "Gold: 88");
-        graphics.putString(X, Y++, "Health: 188.00/500");
-        graphics.putString(X, Y++, "Agility: 70");
-        graphics.putString(X, Y++, "Strength: 70");
-        Y++;
+        graphics.putString(x, y++, "LVL: 1");
+        graphics.putString(x, y++, "Gold: 88");
+        graphics.putString(x, y++, "Health: 188.00/500");
+        graphics.putString(x, y++, "Agility: 70");
+        graphics.putString(x, y++, "Strength: 70");
+        y++;
 
         // Инвентарь в UI
         graphics.setForegroundColor(TextColor.ANSI.YELLOW);
-        graphics.putString(X, Y++, "Backpack:");
+        graphics.putString(x, y++, "Backpack:");
         graphics.setForegroundColor(TextColor.ANSI.WHITE);
-        graphics.putString(X, Y++, "Food: 3");
-        graphics.putString(X, Y++, "Elixirs: 3");
-        graphics.putString(X, Y++, "Weapons: 3");
-        graphics.putString(X, Y, "Scrolls: 3");
+        graphics.putString(x, y++, "Food: 3");
+        graphics.putString(x, y++, "Elixirs: 3");
+        graphics.putString(x, y++, "Weapons: 3");
+        graphics.putString(x, y, "Scrolls: 3");
     }
 
     private static void drawMenu(Screen screen, TextGraphics graphics, String currentMenuType, List<String> currentMenuItems) {
         int menuX = 1;
-        int menuY = ROOM_HEIGHT + 3;
+        int menuY = LEVEL_HEIGHT + 3;
 
         graphics.setBackgroundColor(TextColor.ANSI.BLACK);
         graphics.setForegroundColor(TextColor.ANSI.WHITE);
@@ -195,7 +271,7 @@ public class ScreenManager {
         try {
             TextGraphics graphics = screen.newTextGraphics();
             graphics.setForegroundColor(TextColor.ANSI.YELLOW);
-            graphics.putString(0, ROOM_HEIGHT + 5, message);
+            graphics.putString(0, LEVEL_HEIGHT + 5, message);
             screen.refresh();
             Thread.sleep(1500);
         } catch (Exception e) {

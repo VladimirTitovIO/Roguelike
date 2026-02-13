@@ -43,7 +43,7 @@ public class Presentation {
     // Инициализация терминала и экрана
     private static Screen initializeTerminal() throws IOException {
         TerminalSize terminalSize = new TerminalSize(140, 40);
-        Font font = new Font("Monospaced", Font.BOLD, 15);
+        Font font = new Font("Monospaced", Font.PLAIN, 17);
         SwingTerminalFontConfiguration fontConfig =
                 SwingTerminalFontConfiguration.newInstance(font);
 
@@ -69,7 +69,7 @@ public class Presentation {
                     ScreenManager.renderStartScreen(screen);
                     break;
                 case MENU_SCREEN:
-                    ScreenManager.menuScreen(screen, Controller.getCurrentMenuLine());
+                    ScreenManager.renderMenuScreen(screen, Controller.getCurrentMenuLine());
                     break;
                 case GAME_SCREEN:
                     ScreenManager.renderLevel(
@@ -89,13 +89,13 @@ public class Presentation {
                     List<ScoreEntry> scores = new ArrayList<>();
                     scores.add(new ScoreEntry(123, 7, 15, 3, 2, 1, 45, 10, 200));
                     scores.add(new ScoreEntry(89, 5, 10, 2, 1, 0, 30, 5, 150));
-                    ScreenManager.scoreboardScreen(screen, scores);
+                    ScreenManager.renderScoreboardScreen(screen, scores);
                     break;
                 case DEAD_SCREEN:
-                    ScreenManager.deadScreen(screen);
+                    ScreenManager.renderDeadScreen(screen);
                     break;
                 case ENDGAME_SCREEN:
-                    ScreenManager.endgameScreen(screen);
+                    ScreenManager.renderEndgameScreen(screen);
                     break;
             }
 

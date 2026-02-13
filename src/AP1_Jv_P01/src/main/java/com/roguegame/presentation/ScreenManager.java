@@ -22,7 +22,7 @@ public class ScreenManager {
     public static void renderStartScreen(Screen screen) throws IOException {
         screen.clear();
         TextGraphics graphics = screen.newTextGraphics();
-        //graphics.setBackgroundColor(TextColor.ANSI.BLACK);
+        graphics.setBackgroundColor(TextColor.ANSI.BLACK);
         graphics.setForegroundColor(TextColor.ANSI.GREEN);
 
         String[] deathArt = {
@@ -44,7 +44,7 @@ public class ScreenManager {
         screen.refresh();
     }
 
-    public static void menuScreen(Screen screen, int currentLine) throws IOException {
+    public static void renderMenuScreen(Screen screen, int currentLine) throws IOException {
         screen.clear();
         TextGraphics graphics = screen.newTextGraphics();
 
@@ -66,7 +66,7 @@ public class ScreenManager {
         screen.refresh();
     }
 
-    public static void deadScreen(Screen screen) throws IOException {
+    public static void renderDeadScreen(Screen screen) throws IOException {
         screen.clear();
         TextGraphics graphics = screen.newTextGraphics();
 
@@ -90,7 +90,7 @@ public class ScreenManager {
         //screen.readInput();
     }
 
-    public static void endgameScreen(Screen screen) throws IOException {
+    public static void renderEndgameScreen(Screen screen) throws IOException {
         screen.clear();
         TextGraphics graphics = screen.newTextGraphics();
         graphics.setForegroundColor(TextColor.ANSI.GREEN);
@@ -277,7 +277,7 @@ public class ScreenManager {
         }
     }
 
-    public static void scoreboardScreen(Screen screen, List<ScoreEntry> scores) throws IOException {
+    public static void renderScoreboardScreen(Screen screen, List<ScoreEntry> scores) throws IOException {
         screen.clear();
         TextGraphics graphics = screen.newTextGraphics();
 

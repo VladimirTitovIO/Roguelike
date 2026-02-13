@@ -1,6 +1,6 @@
-package domain;
+package com.roguegame.domain;
 
-import domain.ItemTypes.Subtype;
+import com.roguegame.domain.ItemTypes.Subtype;
 
 public class Item {
     private int health;

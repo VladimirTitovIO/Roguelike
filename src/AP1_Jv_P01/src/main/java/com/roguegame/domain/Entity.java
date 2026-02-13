@@ -1,7 +1,7 @@
-package domain;
+package com.roguegame.domain;
 
-import domain.GameMap.Direction;
-import domain.TurnManager.Turn;
+import com.roguegame.domain.GameMap.Direction;
+import com.roguegame.domain.TurnManager.Turn;
 
 
 abstract class Entity {

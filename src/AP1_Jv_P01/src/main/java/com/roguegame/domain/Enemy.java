@@ -1,6 +1,6 @@
-package domain;
+package com.roguegame.domain;
 
-import domain.GameMap.Direction;
+import com.roguegame.domain.GameMap.Direction;
 import java.util.Random;
 
 

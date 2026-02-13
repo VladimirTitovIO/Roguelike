@@ -1,14 +1,12 @@
-package presentation;
+package com.roguegame.presentation;
 
-import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
-import com.googlecode.lanterna.screen.TerminalScreen;
-import domain.DungeonLevel;
-import domain.DungeonLevel.Position;
-import domain.GameMap.TileType;
-import domain.ScoreEntry;
+import com.roguegame.domain.DungeonLevel;
+import com.roguegame.domain.DungeonLevel.Position;
+import com.roguegame.domain.GameMap.TileType;
+import com.roguegame.domain.ScoreEntry;
 
 import java.io.IOException;
 import java.util.List;

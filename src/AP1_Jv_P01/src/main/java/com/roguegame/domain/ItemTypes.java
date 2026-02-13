@@ -1,4 +1,4 @@
-package domain;
+package com.roguegame.domain;
 
 public class ItemTypes {
     public enum Type {

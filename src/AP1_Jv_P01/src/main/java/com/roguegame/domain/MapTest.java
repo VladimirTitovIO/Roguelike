@@ -1,4 +1,4 @@
-package domain;
+package com.roguegame.domain;
 import java.util.*;
 import java.util.Map;
 

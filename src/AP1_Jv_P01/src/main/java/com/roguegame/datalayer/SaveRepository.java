@@ -1,4 +1,4 @@
-package datalayer;
+package com.roguegame.datalayer;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

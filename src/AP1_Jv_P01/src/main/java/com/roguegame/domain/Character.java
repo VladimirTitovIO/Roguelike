@@ -1,10 +1,9 @@
-package domain;
+package com.roguegame.domain;
 
-import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import domain.ItemTypes.Subtype;
+import com.roguegame.domain.ItemTypes.Subtype;
 
 public class Character extends Entity {
     private int maximumHealth;

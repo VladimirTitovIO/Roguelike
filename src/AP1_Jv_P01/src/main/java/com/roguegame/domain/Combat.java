@@ -1,6 +1,6 @@
-package domain;
+package com.roguegame.domain;
 
-import domain.TurnManager.Turn;
+import com.roguegame.domain.TurnManager.Turn;
 
 public class Combat {
 

@@ -1,21 +1,20 @@
-package presentation;
+package com.roguegame.presentation;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.input.KeyStroke;
-import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration;
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
-import domain.ScoreEntry;
+import com.roguegame.domain.ScoreEntry;
 
 import java.awt.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
-//import static presentation.Controller.leaderboardService;
+//import static com.roguegame.presentation.Controller.leaderboardService;
 
 public class Presentation {
     public static void main(String[] args) {

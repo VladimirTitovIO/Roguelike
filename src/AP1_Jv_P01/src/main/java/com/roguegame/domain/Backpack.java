@@ -1,4 +1,4 @@
-package domain;
+package com.roguegame.domain;
 
 import java.util.ArrayList;
 import java.util.List;

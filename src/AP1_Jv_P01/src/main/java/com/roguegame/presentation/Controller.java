@@ -1,20 +1,20 @@
-package presentation;
+package com.roguegame.presentation;
 
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
-import domain.DungeonLevel;
-import domain.DungeonLevel.Position;
-import domain.GameMap;
-import domain.GameMap.TileType;
+import com.roguegame.domain.DungeonLevel;
+import com.roguegame.domain.DungeonLevel.Position;
+import com.roguegame.domain.GameMap;
+import com.roguegame.domain.GameMap.TileType;
 //import domain.LeaderboardService;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static domain.DungeonLevel.HEIGHT;
-import static domain.DungeonLevel.WIDTH;
+import static com.roguegame.domain.DungeonLevel.HEIGHT;
+import static com.roguegame.domain.DungeonLevel.WIDTH;
 
 public class Controller {
     public enum GameState {

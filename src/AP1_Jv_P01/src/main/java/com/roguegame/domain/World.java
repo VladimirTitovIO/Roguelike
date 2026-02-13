@@ -1,8 +1,8 @@
-package domain;
+package com.roguegame.domain;
 
 import java.util.ArrayList;
 import java.util.List;
-import domain.GameMap.Direction;
+import com.roguegame.domain.GameMap.Direction;
 
 public class World {
     private final List<Enemy> enemies;

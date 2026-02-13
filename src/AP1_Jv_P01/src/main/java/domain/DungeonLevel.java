@@ -33,9 +33,6 @@ public class DungeonLevel implements GameMap {
     private Room[] rooms;
     private Room startRoom;
     private Room endRoom;
-    private Position startPos;
-    private Position exitPos;
-
 
     // ---------- Doors & Keys (Task 6) ----------
     public enum DoorColor { RED, BLUE, YELLOW }
@@ -83,8 +80,6 @@ public class DungeonLevel implements GameMap {
             generateRooms();
             generatePassagesWithDoors();
             pickStartEndRooms();
-            startPos = getSafePosition(startRoom);
-            exitPos = getSafePosition(endRoom);
 
             if (!generateLocksAndKeysNoSoftlock()) {
                 continue;
@@ -496,12 +491,13 @@ public class DungeonLevel implements GameMap {
     // -------------------- Public helpers for other game logic --------------------
 
     public Position getStartPosition() {
-        return startPos;
+        return getSafePosition(startRoom);
     }
 
     public Position getExitPosition() {
-        return exitPos;
+        return getSafePosition(endRoom);
     }
+
     public Map<Position, Door> getDoors() {
         return Collections.unmodifiableMap(doors);
     }
@@ -565,30 +561,38 @@ public class DungeonLevel implements GameMap {
         final int u, v;
         Edge(int u, int v) { this.u = u; this.v = v; }
     }
-    public DungeonLevel(TileType[][] loadedTiles,
-                        Map<Position, Door> loadedDoors,
-                        Map<Position, DoorColor> loadedKeys,
-                        Position loadedStart,
-                        Position loadedExit) {
 
-        this.tiles = loadedTiles;
-        this.rooms = new Room[ROOMS_NUM];
-        this.startRoom = null;
-        this.endRoom = null;
-
-        this.doors.clear();
-        this.keysOnGround.clear();
-        this.doorPositions.clear();
-
-        this.doors.putAll(loadedDoors);
-        this.keysOnGround.putAll(loadedKeys);
-
-        this.startPos = loadedStart;
-        this.exitPos = loadedExit;
-
-        // рамка стен обязательно
-        enforceBorderWalls();
+    //=====================ADD-ONS-SORENLEN====================
+    public static int getRoomsNumber()  {
+        return ROOMS_NUM;
+    }
+    //check whether there is a room containing given coordinates
+    public int getRoomAt(int x, int y) {
+        for (int i = 0; i < rooms.length; i++) {
+            Room current = rooms[i];
+            if (x > current.x1 && x < current.x2
+                    && y > current.y1 && y < current.y2) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    //-1 to get floor only
+    public int getRoomWidth(int x, int y) {
+        for (Room room : rooms) {
+            if (room.x1 == x && room.y1 == y) {
+                return room.x2 - room.x1 - 1;
+            }
+        }
+        return 0;
     }
 
+    public int getRoomHeight(int x, int y) {
+        for (Room room : rooms) {
+            if (room.x1 == x && room.y1 == y) {
+                return room.y2 - room.y1 - 1;
+            }
+        }
+        return 0;
+    }
 }
-

@@ -49,5 +49,20 @@ public interface GameMap {
         public static Direction getRandomDiagonalDirections() {
             return DIAGONAL[random.nextInt(DIAGONAL.length)];
         }
+
+        public static Direction calculateDiagonalDirection(int x, int y) {
+            if (x > 0 && y > 0) {
+                return DIAGONALLY_DOWN_RIGHT;
+            }
+            else if (x > 0 && y < 0) {
+                return DIAGONALLY_UP_RIGHT;
+            }
+            else if (x < 0 && y > 0) {
+                return DIAGONALLY_DOWN_LEFT;
+            }
+            else {
+                return DIAGONALLY_UP_LEFT;
+            }
+        }
     }
 }

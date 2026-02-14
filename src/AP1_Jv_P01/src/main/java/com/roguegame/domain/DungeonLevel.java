@@ -562,37 +562,26 @@ public class DungeonLevel implements GameMap {
         Edge(int u, int v) { this.u = u; this.v = v; }
     }
 
-    //=====================ADD-ONS-SORENLEN====================
-    public static int getRoomsNumber()  {
-        return ROOMS_NUM;
-    }
-    //check whether there is a room containing given coordinates
-    public int getRoomAt(int x, int y) {
-        for (int i = 0; i < rooms.length; i++) {
-            Room current = rooms[i];
-            if (x > current.x1 && x < current.x2
-                    && y > current.y1 && y < current.y2) {
-                return i;
-            }
+//=====================ADD-ONS-SORENLEN====================
+        public static int getRoomsNumber()  {
+            return ROOMS_NUM;
         }
-        return -1;
-    }
-    //-1 to get floor only
-    public int getRoomWidth(int x, int y) {
-        for (Room room : rooms) {
-            if (room.x1 == x && room.y1 == y) {
-                return room.x2 - room.x1 - 1;
+        //check whether there is a room containing given coordinates
+        public int getRoomAt(int x, int y) {
+            for (int i = 0; i < rooms.length; i++) {
+                Room current = rooms[i];
+                if (x > current.x1 && x < current.x2
+                        && y > current.y1 && y < current.y2) {
+                    return i;
+                }
             }
+            return -1;
         }
-        return 0;
-    }
+        public int getRandomRoomX(int roomNum) {
+            return random.nextInt(rooms[roomNum].x1 + 1, rooms[roomNum].x2);
+        }
 
-    public int getRoomHeight(int x, int y) {
-        for (Room room : rooms) {
-            if (room.x1 == x && room.y1 == y) {
-                return room.y2 - room.y1 - 1;
-            }
+        public int getRandomRoomY(int roomNum) {
+            return random.nextInt(rooms[roomNum].y1 + 1, rooms[roomNum].y2);
         }
-        return 0;
-    }
 }

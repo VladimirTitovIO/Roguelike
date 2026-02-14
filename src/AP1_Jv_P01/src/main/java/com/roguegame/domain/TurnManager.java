@@ -47,4 +47,3 @@ public class TurnManager {
         return "Current turn: " + currentTurn;
     }
 }
-

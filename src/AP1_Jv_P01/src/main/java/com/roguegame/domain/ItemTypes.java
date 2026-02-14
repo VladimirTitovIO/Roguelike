@@ -55,30 +55,30 @@ public class ItemTypes {
     }
 
     public enum Subtype {
-        FISTS(ItemTypes.Type.WEAPON, 0, 0, 0, 1, 0),
-        AXE(ItemTypes.Type.WEAPON, 0, 0, 0, 4, 0),
-        SWORD(ItemTypes.Type.WEAPON, 0, 0, 0, 2, 0),
-        MACE(ItemTypes.Type.WEAPON, 0, 0, 0, 3, 0),
+        FISTS(ItemTypes.Type.WEAPON, 0, 0, 0, 1, 0, 0),
+        AXE(ItemTypes.Type.WEAPON, 0, 0, 0, 4, 0, 2),
+        SWORD(ItemTypes.Type.WEAPON, 0, 0, 0, 2, 0, 5),
+        MACE(ItemTypes.Type.WEAPON, 0, 0, 0, 3, 0, 3),
 
-        MEDKIT_SMALL(ItemTypes.Type.MEDKIT, 5, 0, 0, 0, 0),
-        MEDKIT_MEDIUM(ItemTypes.Type.MEDKIT, 9, 0, 0, 0, 0),
-        MEDKIT_BIG(ItemTypes.Type.MEDKIT, 12, 0, 0, 0, 0),
+        MEDKIT_SMALL(ItemTypes.Type.MEDKIT, 12, 0, 0, 0, 0, 5),
+        MEDKIT_MEDIUM(ItemTypes.Type.MEDKIT, 18, 0, 0, 0, 0, 3),
+        MEDKIT_BIG(ItemTypes.Type.MEDKIT, 25, 0, 0, 0, 0, 2),
 
-        ELIXIR_STRENGTH(ItemTypes.Type.ELIXIR, 0, 0, 0, 2, 0),
-        ELIXIR_AGILITY(ItemTypes.Type.ELIXIR, 0, 0, 2, 0, 0),
-        ELIXIR_MAX_HEALTH(ItemTypes.Type.ELIXIR, 0, 4, 0, 0, 0),
+        ELIXIR_STRENGTH(ItemTypes.Type.ELIXIR, 0, 0, 0, 2, 0, 4),
+        ELIXIR_AGILITY(ItemTypes.Type.ELIXIR, 0, 0, 2, 0, 0, 4),
+        ELIXIR_MAX_HEALTH(ItemTypes.Type.ELIXIR, 0, 10, 0, 0, 0, 2),
 
-        FOOD_SMALL(ItemTypes.Type.FOOD, 4, 0, 0, 0, 0),
-        FOOD_MEDIUM(ItemTypes.Type.FOOD, 8, 0, 0, 0, 0),
-        FOOD_BIG(ItemTypes.Type.FOOD, 11, 0, 0, 0, 0),
+        FOOD_SMALL(ItemTypes.Type.FOOD, 5, 0, 0, 0, 0, 5),
+        FOOD_MEDIUM(ItemTypes.Type.FOOD, 10, 0, 0, 0, 0, 3),
+        FOOD_BIG(ItemTypes.Type.FOOD, 15, 0, 0, 0, 0, 1),
 
-        TREASURE_SMALL(ItemTypes.Type.TREASURE, 0, 0, 0, 0, 10),
-        TREASURE_MEDIUM(ItemTypes.Type.TREASURE, 0, 0, 0, 0, 15),
-        TREASURE_BIG(ItemTypes.Type.TREASURE, 0, 0, 0, 0, 20),
+        TREASURE_SMALL(ItemTypes.Type.TREASURE, 0, 0, 0, 0, 15, 5),
+        TREASURE_MEDIUM(ItemTypes.Type.TREASURE, 0, 0, 0, 0, 25, 4),
+        TREASURE_BIG(ItemTypes.Type.TREASURE, 0, 0, 0, 0, 35, 2),
 
-        SCROLLS_STRENGTH(ItemTypes.Type.SCROLLS, 0, 0, 0, 3, 0),
-        SCROLLS_AGILITY(ItemTypes.Type.SCROLLS, 0, 0, 3, 0, 0),
-        SCROLLS_MAX_HEALTH(ItemTypes.Type.SCROLLS, 0, 5, 0, 0, 0);
+        SCROLLS_STRENGTH(ItemTypes.Type.SCROLLS, 0, 0, 0, 3, 0, 4),
+        SCROLLS_AGILITY(ItemTypes.Type.SCROLLS, 0, 0, 3, 0, 0, 4),
+        SCROLLS_MAX_HEALTH(ItemTypes.Type.SCROLLS, 0, 10, 0, 0, 0, 2);
 
         private final ItemTypes.Type type;
         private final int maximumHealth;
@@ -86,6 +86,7 @@ public class ItemTypes {
         private final int strength;
         private final int value;
         private final int health;
+        private final int weight;
 
         public int getHealth() {
             return health;
@@ -121,14 +122,18 @@ public class ItemTypes {
         }
 
 
-        Subtype(ItemTypes.Type type, int health, int maximumHealth, int agility, int strength, int value) {
+        Subtype(ItemTypes.Type type, int health, int maximumHealth, int agility, int strength, int value, int weight) {
             this.type = type;
             this.agility = agility;
             this.strength = strength;
             this.value = value;
             this.health = health;
             this.maximumHealth = maximumHealth;
+            this.weight = weight;
+        }
+
+        public int getWeight() {
+            return weight;
         }
     }
 }
-

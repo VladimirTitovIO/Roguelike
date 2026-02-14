@@ -9,7 +9,7 @@ public class Item {
     private int strength;
     private int value;
     private final ItemTypes.Type type;
-    private final Subtype subtype;
+    private Subtype subtype;
     private Character owner;
     private int posX;
     private int posY;
@@ -41,6 +41,10 @@ public class Item {
 
     public Subtype getSubtype() {
         return subtype;
+    }
+
+    public void setSubtype(ItemTypes.Subtype subtype) {
+        this.subtype = subtype;
     }
 
     public ItemTypes.Type getType() {
@@ -130,7 +134,10 @@ public class Item {
     }
 
     public void useFoodOrMedkit(Character target) {
-        target.setHealth(target.getHealth() + health);
+        if (target.getHealth() + health >= target.getMaximumHealth())
+            target.setHealth(target.getMaximumHealth());
+        else
+            target.setHealth(target.getHealth() + health);
     }
 
     public void useTreasure(Character target) {
@@ -138,7 +145,6 @@ public class Item {
     }
 
     public void useWeapon(Character target) {
-        target.setWeapon(subtype);
+        target.setWeapon(this);
     }
-
 }

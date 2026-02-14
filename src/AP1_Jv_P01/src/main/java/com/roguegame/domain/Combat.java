@@ -2,50 +2,56 @@ package com.roguegame.domain;
 
 import com.roguegame.domain.TurnManager.Turn;
 
-public class Combat {
+import java.util.Random;
 
-    public int calculatePlayerDamage(Character player, Enemy monster) {
+public class Combat {
+    private Random random = new Random();
+
+    private int calculatePlayerDamage(Character player, Enemy monster) {
         if (player.getWeapon().getType() != ItemTypes.Type.WEAPON) return 0;
+        int base = player.getStrength() + random.nextInt(2);
         double result = 0.0;
         if (!(monster.getType() == Enemy.Type.VAMPIRE && monster.getType().isFirstVampireHit())
-                && !(monster.getType() == Enemy.Type.SNAKE_MAGE && monster.getType().isPlayerAsleep())) {
-            switch (player.getWeapon()) {
+                && !(monster.getType() == Enemy.Type.SNAKE_MAGE && monster.isPlayerAsleep())) {
+            switch (player.getWeapon().getSubtype()) {
                 case SWORD:
-                    result = (player.getStrength() * 23) / 100.0;
+                    result = base * 0.6;
                     break;
                 case MACE:
-                    result = (player.getStrength() * 21) / 100.0;
+                    result = base * 0.7;
                     break;
                 case AXE:
-                    result = (player.getStrength() * 19) / 100.0;
+                    result = base * 0.8;
                     break;
                 default:
-                    result = ((player.getStrength() + player.getWeapon().getStrength()) * 20) / 100.0;
+                    result = base * 0.45;
                     break;
             }
         } else if (monster.getType() == Enemy.Type.VAMPIRE && monster.getType().isFirstVampireHit()) {
             monster.getType().setFirstVampireHit(false);
+            return 0;
         } else {
-            monster.getType().setPlayerAsleep(false);
+            monster.setPlayerAsleep(false);
+            return 0;
         }
 
         return (int) Math.max(1, Math.round(result));
     }
 
-    public int calculateZombieGhostDamage(Enemy monster) {
-        return (int) Math.max(1, Math.round((monster.getStrength() * 20) / 100.0));
+    private int calculateZombieGhostDamage(Enemy monster) {
+        return (int) Math.max(1, Math.round(monster.getStrength() * 0.55));
     }
 
-    public int calculateVampireDamage(Enemy monster, Character player) {
+    private int calculateVampireDamage(Enemy monster, Character player) {
         if (monster.getType() != Enemy.Type.VAMPIRE) return 0;
         return player.getMaximumHealth() / 10;
     }
 
-    public int calculateOgreDamage(Enemy monster) {
+    private int calculateOgreDamage(Enemy monster) {
         int damage = 0;
         if (monster.getType() != Enemy.Type.OGRE) return damage;
         if (!monster.getType().isOgreCooldown()) {
-            damage = ((monster.getStrength() - 1) * 25) / 100;
+            damage = (int) Math.round(monster.getStrength() * 0.75);
             monster.getType().setOgreCooldown(true);
         } else {
             monster.getType().setOgreCooldown(false);
@@ -53,16 +59,22 @@ public class Combat {
         return damage;
     }
 
-    public int calculateSnakeMageDamage(Enemy monster) {
+    private int calculateSnakeMageDamage(Enemy monster) {
         int damage = 0;
         if (monster.getType() != Enemy.Type.SNAKE_MAGE) return damage;
         if (Math.random() < Enemy.Type.SLEEP_CHANCE) {
-            monster.getType().setPlayerAsleep(true);
+            monster.setPlayerAsleep(true);
+            System.out.println("PLAYA SLEEPY PEEPY");
         }
         return calculateZombieGhostDamage(monster);
     }
 
-    public boolean checkIfHit(Character player, Enemy monster, TurnManager.Turn currentTurn) {
+    private int calculateMimicDamage(Enemy monster) {
+        if (monster.getType() != Enemy.Type.MIMIC) return 0;
+        return (int) Math.max(1, Math.round(monster.getStrength() * 0.8));
+    }
+
+    private boolean checkIfHit(Character player, Enemy monster, TurnManager.Turn currentTurn) {
         double minHitChance = 0.6;
         double maxHitChance = 0.9;
         boolean isHit = false;
@@ -80,35 +92,45 @@ public class Combat {
     }
 
     public void attack(Character player, Enemy monster, TurnManager currentTurn) {
-        if (!currentTurn.isTurnCalculated()) {
-            currentTurn.calculateTurn(player, monster);
-            currentTurn.setTurnCalculated(true);
-        }
         if (currentTurn.getCurrentTurn().equals(Turn.PLAYER)) {
             if (checkIfHit(player, monster, currentTurn.getCurrentTurn())) {
-                monster.setHealth(monster.getHealth() - calculatePlayerDamage(player, monster));
+                int damage = calculatePlayerDamage(player, monster);
+                monster.setHealth(monster.getHealth() - damage);
+                System.out.println("Player dealt: " + damage + " to: " + monster);
             }
             if (monster.getHealth() <= 0) {
                 player.setGold(monster.getType().getValue() + player.getGold());
             }
         } else {
+            int damage = 0;
             if (checkIfHit(player, monster, currentTurn.getCurrentTurn()))
                 switch (monster.getType()) {
                     case OGRE:
-                        player.setHealth(player.getHealth() - calculateOgreDamage(monster));
+                        damage = calculateOgreDamage(monster);
+                        player.setHealth(player.getHealth() - damage);
                         break;
                     case VAMPIRE:
-                        player.setHealth(player.getHealth() - calculateVampireDamage(monster, player));
+                        damage = calculateVampireDamage(monster, player);
+                        player.setHealth(player.getHealth() - damage);
                         break;
                     case SNAKE_MAGE:
-                        player.setHealth(player.getHealth() - calculateSnakeMageDamage(monster));
+                        damage = calculateSnakeMageDamage(monster);
+                        player.setHealth(player.getHealth() - damage);
                         break;
                     case ZOMBIE:
                     case GHOST:
-                        player.setHealth(player.getHealth() - calculateZombieGhostDamage(monster));
+                        damage = calculateZombieGhostDamage(monster);
+                        player.setHealth(player.getHealth() - damage);
+                        break;
+                    case MIMIC:
+                        damage = calculateMimicDamage(monster);
+                        player.setHealth(player.getHealth() - damage);
                         break;
                 }
+            if (player.getHealth() <= 0) {
+                player.setAlive(false);
+            }
+            System.out.println("Enemy dealt: " + damage + " to: " + player);
         }
-        currentTurn.nextTurn();
     }
 }

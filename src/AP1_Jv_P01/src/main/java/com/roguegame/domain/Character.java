@@ -1,7 +1,10 @@
 package com.roguegame.domain;
 
+
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.roguegame.domain.ItemTypes.Subtype;
 
@@ -9,14 +12,23 @@ public class Character extends Entity {
     private int maximumHealth;
     private int health;
     private int strength;
-    private int experience;
     private int gold;
     private final Backpack backpack;
-    private Subtype weapon;
-    private boolean alive = true;
-    private int height;
-    private int width;
+    private Item weapon;
     private final Map<ItemTypes.Subtype, Integer> activeBuffs;
+    private final Set<DungeonLevel.DoorColor> keys = new HashSet<>();
+
+    public void addKey(DungeonLevel.DoorColor color) {
+        keys.add(color);
+    }
+
+    public boolean hasKey(DungeonLevel.DoorColor color) {
+        return keys.contains(color);
+    }
+
+    public Set<DungeonLevel.DoorColor> getKeys() {
+        return keys;
+    }
 
     public Backpack getBackpack() {
         return backpack;
@@ -42,14 +54,6 @@ public class Character extends Entity {
         this.strength = strength;
     }
 
-    public void setExperience(int experience) {
-        this.experience = experience;
-    }
-
-    public int getExperience() {
-        return experience;
-    }
-
     public int getStrength() {
         int tempStrength = 0;
         if (weapon != null) {
@@ -73,11 +77,11 @@ public class Character extends Entity {
         return health;
     }
 
-    public ItemTypes.Subtype getWeapon() {
+    public Item getWeapon() {
         return weapon;
     }
 
-    public void setWeapon(ItemTypes.Subtype weapon) {
+    public void setWeapon(Item weapon) {
         this.weapon = weapon;
     }
 
@@ -89,37 +93,27 @@ public class Character extends Entity {
         return maximumHealth + tempMaximumHealth;
     }
 
-    public boolean isAlive() {
-        return alive;
-    }
-
-    public void die() {
-        alive = false;
-    }
-
     public Character(int posX, int posY) {
-        super(posX, posY,1, 1);
-        maximumHealth = 10;
-        health = 10;
+        super(posX, posY);
+        maximumHealth = 25;
+        health = 25;
         setAgility(4);
         strength = 4;
-        experience = 0;
         gold = 0;
         setSpeed(2);
-        backpack = new Backpack(45);
-        weapon = Subtype.FISTS;
+        weapon = new Item(Subtype.FISTS, 0, 0);
+        backpack = new Backpack(54);
         activeBuffs = new HashMap<>();
     }
 
     @Override
     public String toString() {
         return "Character: {health: " + health + ", maximum health: " + maximumHealth + ", agility: " +
-                getAgility() + ", \nstrength: " + strength + ", speed: " + getSpeed() + ", experience: " + experience
-                + ", gold: " + gold + "}";
+                getAgility() + ", \nstrength: " + strength + ", speed: " + getSpeed() + ", gold: " + gold + "}";
     }
 
     public void addBuff(ItemTypes.Subtype item) {
-        activeBuffs.put(item, 10);
+        activeBuffs.put(item, 40);
     }
 
     public void tickBuffs() {

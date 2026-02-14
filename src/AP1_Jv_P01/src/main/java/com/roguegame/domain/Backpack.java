@@ -9,10 +9,6 @@ public class Backpack {
     private final List<Item> items;
     private final Map<ItemTypes.Type, Integer> typeLimits;
 
-    public int getCapacity() {
-        return capacity;
-    }
-
     public List<Item> getItems() {
         return List.copyOf(items);
     }
@@ -33,7 +29,8 @@ public class Backpack {
                 ItemTypes.Type.MEDKIT, 9,
                 ItemTypes.Type.SCROLLS, 9,
                 ItemTypes.Type.FOOD, 9,
-                ItemTypes.Type.ELIXIR, 9
+                ItemTypes.Type.ELIXIR, 9,
+                ItemTypes.Type.TREASURE, 9
         );
     }
 
@@ -60,10 +57,7 @@ public class Backpack {
                 continue;
             }
             item.use(target);
-            if (item.getType() == ItemTypes.Type.FOOD || item.getType() == ItemTypes.Type.SCROLLS ||
-                    item.getType() == ItemTypes.Type.ELIXIR || item.getType() == ItemTypes.Type.MEDKIT) {
-                items.remove(i);
-            }
+            items.remove(i);
             return true;
         }
         return false;

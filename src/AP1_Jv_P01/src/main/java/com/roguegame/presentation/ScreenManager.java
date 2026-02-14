@@ -25,7 +25,7 @@ public class ScreenManager {
         graphics.setBackgroundColor(TextColor.ANSI.BLACK);
         graphics.setForegroundColor(TextColor.ANSI.GREEN);
 
-        String[] deathArt = {
+        String[] titleArt = {
                 "R R R       O O       G G G     U     U    E E E       ",
                 "R     R   O     O   G       G   U     U    E           ",
                 "R     R   O     O   G           U     U    E E E       ",
@@ -36,11 +36,11 @@ public class ScreenManager {
 
         int startX = 5;
         int startY = 5;
-        for (int i = 0; i < deathArt.length; i++) {
-            graphics.putString(startX, startY + i, deathArt[i]);
+        for (int i = 0; i < titleArt.length; i++) {
+            graphics.putString(startX, startY + i, titleArt[i]);
         }
         graphics.setForegroundColor(TextColor.ANSI.WHITE);
-        graphics.putString(startX, startY + deathArt.length + 2, "Press any key to continue...");
+        graphics.putString(startX, startY + titleArt.length + 2, "Press any key to continue...");
         screen.refresh();
     }
 

@@ -112,8 +112,12 @@ public class ScreenManager {
     public static void renderMenuScreen(Screen screen, int currentLine) throws IOException {
         screen.clear();
         TextGraphics graphics = screen.newTextGraphics();
+        graphics.setBackgroundColor(TextColor.ANSI.BLACK);
+        graphics.setForegroundColor(TextColor.ANSI.GREEN);
 
         graphics.putString(5, 5, "     GAME MENU     ");
+
+        graphics.setForegroundColor(TextColor.ANSI.WHITE);
         graphics.putString(5, 6, "+------------------+");
         graphics.putString(5, 7, "|                  |");
         graphics.putString(5, 8, "|    NEW GAME      |");
@@ -125,6 +129,7 @@ public class ScreenManager {
 
         // Выделение текущей строки
         int menuY = 8 + currentLine;
+        graphics.setForegroundColor(TextColor.ANSI.GREEN);
         graphics.putString(6, menuY, "<<<");
         graphics.putString(21, menuY, ">>>");
 

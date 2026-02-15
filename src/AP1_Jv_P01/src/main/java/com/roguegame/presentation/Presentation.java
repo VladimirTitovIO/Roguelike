@@ -92,10 +92,10 @@ public class Presentation {
                     ScreenManager.renderScoreboardScreen(screen, scores);
                     break;
                 case DEAD_SCREEN:
-                    ScreenManager.renderDeadScreen(screen);
+                    ScreenManager.renderDefeatScreen(screen);
                     break;
                 case ENDGAME_SCREEN:
-                    ScreenManager.renderEndgameScreen(screen);
+                    ScreenManager.renderVictoryScreen(screen);
                     break;
             }
 

@@ -17,31 +17,96 @@ public class ScreenManager {
     public static final int LEVEL_HEIGHT = DungeonLevel.HEIGHT;
     public static final int VIEW_RADIUS = Controller.VIEW_RADIUS;
 
-    // Экраны
-
-    public static void renderStartScreen(Screen screen) throws IOException {
+    // Универсальный метод для отрисовки полноэкранных сообщений
+    public static void renderFullscreenMessage(Screen screen, MessageType type) throws IOException {
         screen.clear();
         TextGraphics graphics = screen.newTextGraphics();
         graphics.setBackgroundColor(TextColor.ANSI.BLACK);
-        graphics.setForegroundColor(TextColor.ANSI.GREEN);
 
-        String[] titleArt = {
-                "R R R       O O       G G G     U     U    E E E       ",
-                "R     R   O     O   G       G   U     U    E           ",
-                "R     R   O     O   G           U     U    E E E       ",
-                "R R R     O     O   G   G G G   U     U    E           ",
-                "R    R    O     O   G       G   U     U    E           ",
-                "R     R     O O       G G G      U U U     E E E       "
-        };
+        String[] artLines;
+        TextColor primaryColor;
 
+        switch (type) {
+            case START:
+                artLines = new String[]{
+                        "R R R       O O       G G G     U     U    E E E       ",
+                        "R     R   O     O   G       G   U     U    E           ",
+                        "R     R   O     O   G           U     U    E E E       ",
+                        "R R R     O     O   G   G G G   U     U    E           ",
+                        "R    R    O     O   G       G   U     U    E           ",
+                        "R     R     O O       G G G      U U U     E E E       "
+                };
+                primaryColor = TextColor.ANSI.GREEN;
+                break;
+
+            case VICTORY:
+                artLines = new String[]{
+                        "Y     Y     O O      U     U        W           W    I    N       N      !!!  ",
+                        " Y   Y    O     O    U     U        W     W     W    I    N N     N      !!!  ",
+                        "  Y Y    O       O   U     U        W    W W    W    I    N  N    N      !!!  ",
+                        "   Y     O       O   U     U         W   W W   W     I    N   N   N      !!!  ",
+                        "   Y      O     O    U     U          W W   W W      I    N    N  N           ",
+                        "   Y        O O       U U U            W     W       I    N     N N      !!!  "
+                };
+                primaryColor = TextColor.ANSI.GREEN;
+                break;
+
+            case DEFEAT:
+                artLines = new String[]{
+                        "Y     Y     O O      U     U       D D      EEEE        A       D D      ",
+                        " Y   Y    O     O    U     U       D    D   E          A A      D    D   ",
+                        "  Y Y    O       O   U     U       D     D  EEEE      A   A     D     D  ",
+                        "   Y     O       O   U     U       D     D  E        A A A A    D     D  ",
+                        "   Y      O     O    U     U       D    D   E       A       A   D    D   ",
+                        "   Y        O O       U U U        D D      EEEE   A         A  D D      "
+                };
+                primaryColor = TextColor.ANSI.RED;
+                break;
+
+            default:
+                artLines = new String[]{};
+                primaryColor = TextColor.ANSI.WHITE;
+        }
+
+        // Отрисовка арта
+        graphics.setForegroundColor(primaryColor);
         int startX = 5;
         int startY = 5;
-        for (int i = 0; i < titleArt.length; i++) {
-            graphics.putString(startX, startY + i, titleArt[i]);
+        for (int i = 0; i < artLines.length; i++) {
+            graphics.putString(startX, startY + i, artLines[i]);
         }
+
+        // Отрисовка сообщения
         graphics.setForegroundColor(TextColor.ANSI.WHITE);
-        graphics.putString(startX, startY + titleArt.length + 2, "Press any key to continue...");
+        String message = getMessageForType(type);
+        graphics.putString(startX, startY + artLines.length + 2, message);
+
         screen.refresh();
+    }
+
+    private static String getMessageForType(MessageType type) {
+        switch (type) {
+            case START: return "Press any key to continue...";
+            case VICTORY: return "Congratulations! Press any key to continue...";
+            case DEFEAT: return "Game Over. Press any key to continue...";
+            default: return "Press any key to continue...";
+        }
+    }
+
+    public enum MessageType {
+        START, VICTORY, DEFEAT
+    }
+
+    public static void renderStartScreen(Screen screen) throws IOException {
+        renderFullscreenMessage(screen, MessageType.START);
+    }
+
+    public static void renderVictoryScreen(Screen screen) throws IOException {
+        renderFullscreenMessage(screen, MessageType.VICTORY);
+    }
+
+    public static void renderDefeatScreen(Screen screen) throws IOException {
+        renderFullscreenMessage(screen, MessageType.DEFEAT);
     }
 
     public static void renderMenuScreen(Screen screen, int currentLine) throws IOException {
@@ -64,55 +129,6 @@ public class ScreenManager {
         graphics.putString(21, menuY, ">>>");
 
         screen.refresh();
-    }
-
-    public static void renderDeadScreen(Screen screen) throws IOException {
-        screen.clear();
-        TextGraphics graphics = screen.newTextGraphics();
-
-        String[] deathArt = {
-                "Y     Y     O O      U     U       D D      EEEE        A       D D      ",
-                " Y   Y    O     O    U     U       D    D   E          A A      D    D   ",
-                "  Y Y    O       O   U     U       D     D  EEEE      A   A     D     D  ",
-                "   Y     O       O   U     U       D     D  E        A A A A    D     D  ",
-                "   Y      O     O    U     U       D    D   E       A       A   D    D   ",
-                "   Y        O O       U U U        D D      EEEE   A         A  D D      "
-        };
-
-        int startY = 5;
-        for (int i = 0; i < deathArt.length; i++) {
-            graphics.putString(5, startY + i, deathArt[i]);
-        }
-
-        graphics.putString(5, startY + deathArt.length + 2, "Press any key to continue...");
-
-        screen.refresh();
-        //screen.readInput();
-    }
-
-    public static void renderEndgameScreen(Screen screen) throws IOException {
-        screen.clear();
-        TextGraphics graphics = screen.newTextGraphics();
-        graphics.setForegroundColor(TextColor.ANSI.GREEN);
-
-        String[] winArt = {
-                "Y     Y     O O      U     U        W           W    I    N       N      !!!  ",
-                " Y   Y    O     O    U     U        W     W     W    I    N N     N      !!!  ",
-                "  Y Y    O       O   U     U        W    W W    W    I    N  N    N      !!!  ",
-                "   Y     O       O   U     U         W   W W   W     I    N   N   N      !!!  ",
-                "   Y      O     O    U     U          W W   W W      I    N    N  N           ",
-                "   Y        O O       U U U            W     W       I    N     N N      !!!  "
-        };
-
-        int startY = 5;
-        for (int i = 0; i < winArt.length; i++) {
-            graphics.putString(5, startY + i, winArt[i]);
-        }
-        graphics.setForegroundColor(TextColor.ANSI.WHITE);
-        graphics.putString(5, startY + winArt.length + 2, "Press any key to continue...");
-
-        screen.refresh();
-        //screen.readInput();
     }
 
     // Игровой экран

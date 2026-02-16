@@ -141,98 +141,137 @@ public class ScreenManager {
     public static void renderLevel(Screen screen, int playerX, int playerY, boolean showingMenu,
                                    String currentMenuType, List<String> currentMenuItems) throws IOException {
         TextGraphics graphics = screen.newTextGraphics();
-
-        // Очистка экрана
         screen.clear();
 
         DungeonLevel level = Controller.getCurrentLevel();
 
-        // Рисуем карту с учётом тумана войны
-        for (int y = 0; y < LEVEL_HEIGHT; y++) {
-            for (int x = 0; x < LEVEL_WIDTH; x++) {
-                TileType tile = level.getTile(x, y);
+        renderMap(graphics, level);
+        renderPlayer(graphics, playerX, playerY);
+        renderUIPanel(graphics);
 
-                boolean isSeen = Controller.isExplored(x, y); // уже исследовано?
-                boolean isVisibleNow = Controller.isCurrentlyVisible(x, y); // видно прямо сейчас?
-
-                if (isVisibleNow) {
-                    // Видим — рисуем
-                    switch (tile) {
-                        case WALL:
-                            graphics.setForegroundColor(TextColor.ANSI.WHITE);
-                            graphics.setCharacter(x, y, '#');
-                            break;
-                        case FLOOR:
-                            graphics.setForegroundColor(TextColor.ANSI.GREEN);
-                            graphics.setCharacter(x, y, '.');
-                            break;
-                        case CORRIDOR:
-                            graphics.setForegroundColor(TextColor.ANSI.YELLOW);
-                            graphics.setCharacter(x, y, '.');
-                            break;
-                        case DOOR:
-                            Position pos = new Position(x, y);
-                            var door = level.getDoors().get(pos);
-                            if (door != null) {
-                                if (door.locked) {
-                                    graphics.setForegroundColor(getDoorColor(door.color));
-                                    graphics.setCharacter(x, y, 'D'); // или '🔒'
-                                } else {
-                                    graphics.setForegroundColor(TextColor.ANSI.CYAN);
-                                    graphics.setCharacter(x, y, '+');
-                                }
-                            } else {
-                                graphics.setForegroundColor(TextColor.ANSI.CYAN);
-                                graphics.setCharacter(x, y, '+');
-                            }
-                            break;
-                        default:
-                            graphics.setForegroundColor(TextColor.ANSI.WHITE);
-                            graphics.setCharacter(x, y, '?');
-                    }
-                } else if (isSeen) {
-                    // Исследовано, но не видно сейчас — рисуем только стены
-                    if (tile == TileType.WALL) {
-                        graphics.setForegroundColor(TextColor.ANSI.WHITE);
-                        graphics.setCharacter(x, y, '#');
-                    } else {
-                        // Не стена — рисуем тёмно (как "затемнённое" пространство)
-                        graphics.setForegroundColor(TextColor.ANSI.BLACK);
-                        graphics.setCharacter(x, y, ' ');
-                    }
-                } else {
-                    // Не исследовано — чёрный фон
-                    graphics.setForegroundColor(TextColor.ANSI.BLACK);
-                    graphics.setCharacter(x, y, ' ');
-                }
-            }
-        }
-
-        // Рисуем ключи (если они видны)
-        for (var entry : level.getKeysOnGround().entrySet()) {
-            Position pos = entry.getKey();
-            if (Controller.isVisible(pos.x, pos.y)) {
-                graphics.setForegroundColor(getKeyColor(entry.getValue()));
-                graphics.setCharacter(pos.x, pos.y, 'K'); // или '🔑'
-            }
-        }
-
-        // Рисуем игрока
-        graphics.setForegroundColor(TextColor.ANSI.WHITE);
-        graphics.setCharacter(playerX, playerY, '@');
-
-        // Рисуем UI-панель
-        drawUIPanel(graphics);
-
-        // Если меню открыто — рисуем его поверх
         if (showingMenu) {
             drawMenu(screen, graphics, currentMenuType, currentMenuItems);
         }
 
-        // Подсказка
-        graphics.putString(1, 38, "WASD to move | J/K/H/E to use items | ESC to quit");
+        renderControlsHint(graphics);
         screen.refresh();
     }
+
+    private static void renderMap(TextGraphics graphics, DungeonLevel level) {
+        for (int y = 0; y < LEVEL_HEIGHT; y++) {
+            for (int x = 0; x < LEVEL_WIDTH; x++) {
+                TileType tile = level.getTile(x, y);
+                boolean isSeen = Controller.isExplored(x, y);
+                boolean isVisibleNow = Controller.isCurrentlyVisible(x, y);
+
+                renderTile(graphics, tile, x, y, isSeen, isVisibleNow, level);
+            }
+        }
+
+        renderKeys(graphics, level);
+    }
+
+    private static void renderTile(TextGraphics graphics, TileType tile, int x, int y,
+                                   boolean isSeen, boolean isVisibleNow, DungeonLevel level) {
+        if (isVisibleNow) {
+            drawVisibleTile(graphics, tile, x, y, level);
+        } else if (isSeen) {
+            drawExploredTile(graphics, tile, x, y);
+        } else {
+            drawUnexploredTile(graphics, x, y);
+        }
+    }
+
+    private static void drawVisibleTile(TextGraphics graphics, TileType tile, int x, int y, DungeonLevel level) {
+        switch (tile) {
+            case WALL:
+                graphics.setForegroundColor(TextColor.ANSI.WHITE);
+                graphics.setCharacter(x, y, '#');
+                break;
+            case FLOOR:
+                graphics.setForegroundColor(TextColor.ANSI.GREEN);
+                graphics.setCharacter(x, y, '.');
+                break;
+            case CORRIDOR:
+                graphics.setForegroundColor(TextColor.ANSI.YELLOW);
+                graphics.setCharacter(x, y, '.');
+                break;
+            case DOOR:
+                renderDoor(graphics, x, y, level);
+                break;
+            default:
+                graphics.setForegroundColor(TextColor.ANSI.WHITE);
+                graphics.setCharacter(x, y, '?');
+        }
+    }
+
+    private static void renderDoor(TextGraphics graphics, int x, int y, DungeonLevel level) {
+        Position pos = new Position(x, y);
+        var door = level.getDoors().get(pos);
+
+        if (door != null && door.locked) {
+            graphics.setForegroundColor(getDoorColor(door.color));
+            graphics.setCharacter(x, y, 'D');
+        } else {
+            graphics.setForegroundColor(TextColor.ANSI.CYAN);
+            graphics.setCharacter(x, y, '+');
+        }
+    }
+
+    private static void drawExploredTile(TextGraphics graphics, TileType tile, int x, int y) {
+        if (tile == TileType.WALL) {
+            graphics.setForegroundColor(TextColor.ANSI.WHITE);
+            graphics.setCharacter(x, y, '#');
+        } else {
+            graphics.setForegroundColor(TextColor.ANSI.BLACK);
+            graphics.setCharacter(x, y, ' ');
+        }
+    }
+
+    private static void drawUnexploredTile(TextGraphics graphics, int x, int y) {
+        graphics.setForegroundColor(TextColor.ANSI.BLACK);
+        graphics.setCharacter(x, y, ' ');
+    }
+
+    private static void renderKeys(TextGraphics graphics, DungeonLevel level) {
+        for (var entry : level.getKeysOnGround().entrySet()) {
+            Position pos = entry.getKey();
+            if (Controller.isVisible(pos.x, pos.y)) {
+                graphics.setForegroundColor(getKeyColor(entry.getValue()));
+                graphics.setCharacter(pos.x, pos.y, 'K');
+            }
+        }
+    }
+
+    private static void renderPlayer(TextGraphics graphics, int playerX, int playerY) {
+        graphics.setForegroundColor(TextColor.ANSI.WHITE);
+        graphics.setCharacter(playerX, playerY, '@');
+    }
+
+    private static void renderUIPanel(TextGraphics graphics) {
+        int x = LEVEL_WIDTH + 2;
+        int y = 1;
+
+        graphics.putString(x, y++, "LVL: 1");
+        graphics.putString(x, y++, "Gold: 88");
+        graphics.putString(x, y++, "Health: 188.00/500");
+        graphics.putString(x, y++, "Agility: 70");
+        graphics.putString(x, y++, "Strength: 70");
+        y++;
+
+        graphics.setForegroundColor(TextColor.ANSI.YELLOW);
+        graphics.putString(x, y++, "Backpack:");
+        graphics.setForegroundColor(TextColor.ANSI.WHITE);
+        graphics.putString(x, y++, "Food: 3");
+        graphics.putString(x, y++, "Elixirs: 3");
+        graphics.putString(x, y++, "Weapons: 3");
+        graphics.putString(x, y, "Scrolls: 3");
+    }
+
+    private static void renderControlsHint(TextGraphics graphics) {
+        graphics.putString(1, 38, "WASD to move | J/K/H/E to use items | ESC to quit");
+    }
+
 
     private static TextColor getDoorColor(DungeonLevel.DoorColor color) {
         return switch (color) {
@@ -248,27 +287,6 @@ public class ScreenManager {
             case BLUE -> TextColor.ANSI.BLUE_BRIGHT;
             case YELLOW -> TextColor.ANSI.YELLOW_BRIGHT;
         };
-    }
-
-    private static void drawUIPanel(TextGraphics graphics) {
-        int x = LEVEL_WIDTH + 2;
-        int y = 1;
-        //int fieldSize = 20;
-        graphics.putString(x, y++, "LVL: 1");
-        graphics.putString(x, y++, "Gold: 88");
-        graphics.putString(x, y++, "Health: 188.00/500");
-        graphics.putString(x, y++, "Agility: 70");
-        graphics.putString(x, y++, "Strength: 70");
-        y++;
-
-        // Инвентарь в UI
-        graphics.setForegroundColor(TextColor.ANSI.YELLOW);
-        graphics.putString(x, y++, "Backpack:");
-        graphics.setForegroundColor(TextColor.ANSI.WHITE);
-        graphics.putString(x, y++, "Food: 3");
-        graphics.putString(x, y++, "Elixirs: 3");
-        graphics.putString(x, y++, "Weapons: 3");
-        graphics.putString(x, y, "Scrolls: 3");
     }
 
     private static void drawMenu(Screen screen, TextGraphics graphics, String currentMenuType, List<String> currentMenuItems) {

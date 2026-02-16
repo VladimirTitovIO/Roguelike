@@ -17,6 +17,10 @@ import java.util.ArrayList;
 //import static com.roguegame.presentation.Controller.leaderboardService;
 
 public class Presentation {
+
+    public static final int TERMINAL_WIDTH = 140;
+    public static final int TERMINAL_HEIGHT = 38;
+
     public static void main(String[] args) {
         Screen screen = null;
         SwingTerminalFrame terminal = null;
@@ -42,7 +46,7 @@ public class Presentation {
 
     // Инициализация терминала и экрана
     private static Screen initializeTerminal() throws IOException {
-        TerminalSize terminalSize = new TerminalSize(140, 40);
+        TerminalSize terminalSize = new TerminalSize(TERMINAL_WIDTH, TERMINAL_HEIGHT);
         Font font = new Font("Monospaced", Font.PLAIN, 17);
         SwingTerminalFontConfiguration fontConfig =
                 SwingTerminalFontConfiguration.newInstance(font);

@@ -13,131 +13,81 @@ import java.util.List;
 
 public class ScreenManager {
 
+    /* --------------------------  константы  -------------------------- */
     public static final int LEVEL_WIDTH = DungeonLevel.WIDTH;
     public static final int LEVEL_HEIGHT = DungeonLevel.HEIGHT;
     public static final int VIEW_RADIUS = Controller.VIEW_RADIUS;
 
-    // Универсальный метод для отрисовки полноэкранных сообщений
+
+    /* ----------------------  публичный high-level API  --------------- */
+    // полноэкранные сообщения (старт/победа/поражение)
     public static void renderFullscreenMessage(Screen screen, MessageType type) throws IOException {
         screen.clear();
         TextGraphics graphics = screen.newTextGraphics();
         graphics.setBackgroundColor(TextColor.ANSI.BLACK);
 
-        String[] artLines;
-        TextColor primaryColor;
+        MessageDesc desc = buildMessageDesc(type);
 
-        switch (type) {
-            case START:
-                artLines = new String[]{
-                        "R R R       O O       G G G     U     U    E E E       ",
-                        "R     R   O     O   G       G   U     U    E           ",
-                        "R     R   O     O   G           U     U    E E E       ",
-                        "R R R     O     O   G   G G G   U     U    E           ",
-                        "R    R    O     O   G       G   U     U    E           ",
-                        "R     R     O O       G G G      U U U     E E E       "
-                };
-                primaryColor = TextColor.ANSI.GREEN;
-                break;
+        // рисуем ASCII-арт, центрированный в верхней части экрана
+        drawAsciiArtCentered(graphics, desc.art(), desc.color(), 0, 0,
+                screen.getTerminalSize().getColumns(), 24);
 
-            case VICTORY:
-                artLines = new String[]{
-                        "Y     Y     O O      U     U        W           W    I    N       N      !!!  ",
-                        " Y   Y    O     O    U     U        W     W     W    I    N N     N      !!!  ",
-                        "  Y Y    O       O   U     U        W    W W    W    I    N  N    N      !!!  ",
-                        "   Y     O       O   U     U         W   W W   W     I    N   N   N      !!!  ",
-                        "   Y      O     O    U     U          W W   W W      I    N    N  N           ",
-                        "   Y        O O       U U U            W     W       I    N     N N      !!!  "
-                };
-                primaryColor = TextColor.ANSI.GREEN;
-                break;
-
-            case DEFEAT:
-                artLines = new String[]{
-                        "Y     Y     O O      U     U       D D      EEEE        A       D D      ",
-                        " Y   Y    O     O    U     U       D    D   E          A A      D    D   ",
-                        "  Y Y    O       O   U     U       D     D  EEEE      A   A     D     D  ",
-                        "   Y     O       O   U     U       D     D  E        A A A A    D     D  ",
-                        "   Y      O     O    U     U       D    D   E       A       A   D    D   ",
-                        "   Y        O O       U U U        D D      EEEE   A         A  D D      "
-                };
-                primaryColor = TextColor.ANSI.RED;
-                break;
-
-            default:
-                artLines = new String[]{};
-                primaryColor = TextColor.ANSI.WHITE;
-        }
-
-        // Отрисовка арта
-        graphics.setForegroundColor(primaryColor);
-        int startX = 5;
-        int startY = 5;
-        for (int i = 0; i < artLines.length; i++) {
-            graphics.putString(startX, startY + i, artLines[i]);
-        }
-
-        // Отрисовка сообщения
-        graphics.setForegroundColor(TextColor.ANSI.WHITE);
-        String message = getMessageForType(type);
-        graphics.putString(startX, startY + artLines.length + 2, message);
+        // подсказка
+        drawStringCentered(TextColor.ANSI.WHITE, graphics, desc.prompt(), 0,
+                screen.getTerminalSize().getRows() - 15, screen.getTerminalSize().getColumns());
 
         screen.refresh();
     }
 
-    private static String getMessageForType(MessageType type) {
-        switch (type) {
-            case START: return "Press any key to continue...";
-            case VICTORY: return "Congratulations! Press any key to continue...";
-            case DEFEAT: return "Game Over. Press any key to continue...";
-            default: return "Press any key to continue...";
-        }
-    }
-
-    public enum MessageType {
-        START, VICTORY, DEFEAT
-    }
-
+    // стартовый экран
     public static void renderStartScreen(Screen screen) throws IOException {
         renderFullscreenMessage(screen, MessageType.START);
     }
 
+    // экран победы
     public static void renderVictoryScreen(Screen screen) throws IOException {
         renderFullscreenMessage(screen, MessageType.VICTORY);
     }
 
+    // экран поражения
     public static void renderDefeatScreen(Screen screen) throws IOException {
         renderFullscreenMessage(screen, MessageType.DEFEAT);
     }
 
+    // игровое меню (выбор пункта стрелками)
     public static void renderMenuScreen(Screen screen, int currentLine) throws IOException {
         screen.clear();
         TextGraphics graphics = screen.newTextGraphics();
         graphics.setBackgroundColor(TextColor.ANSI.BLACK);
-        graphics.setForegroundColor(TextColor.ANSI.GREEN);
 
-        graphics.putString(5, 5, "     GAME MENU     ");
+        // заголовок
+        drawStringCentered(TextColor.ANSI.GREEN, graphics, "GAME MENU", 0, 5,
+                screen.getTerminalSize().getColumns());
 
+        // рамка
+        int boxX = (screen.getTerminalSize().getColumns() - " <<<SCOREBOARD>>> ".length()) / 2;
+        int boxY = 6;
+        int boxW = "<<<SCOREBOARD>>>".length()+2;
+        int boxH = 8;
+        drawBox(graphics, boxX, boxY, boxW, boxH,
+                TextColor.ANSI.WHITE, TextColor.ANSI.BLACK);
+
+        // пункты меню
+        String[] items = {"NEW GAME", "LOAD GAME", "SCOREBOARD", "EXIT GAME"};
         graphics.setForegroundColor(TextColor.ANSI.WHITE);
-        graphics.putString(5, 6, "+------------------+");
-        graphics.putString(5, 7, "|                  |");
-        graphics.putString(5, 8, "|    NEW GAME      |");
-        graphics.putString(5, 9, "|    LOAD GAME     |");
-        graphics.putString(5, 10, "|    SCOREBOARD    |");
-        graphics.putString(5, 11, "|    EXIT GAME     |");
-        graphics.putString(5, 12, "|                  |");
-        graphics.putString(5, 13, "+------------------+");
+        for (int i = 0; i < items.length; i++) {
+            graphics.putString(boxX + 4, boxY + 2 + i, items[i]);
+        }
 
-        // Выделение текущей строки
-        int menuY = 8 + currentLine;
+        // курсор
         graphics.setForegroundColor(TextColor.ANSI.GREEN);
-        graphics.putString(6, menuY, "<<<");
-        graphics.putString(21, menuY, ">>>");
+        graphics.putString(boxX + 1, boxY + 2 + currentLine, ">>>");
+        graphics.putString(boxX + boxW - 4, boxY + 2 + currentLine, "<<<");
 
         screen.refresh();
     }
 
-    // Игровой экран
-
+    // основной игровой экран
     public static void renderLevel(Screen screen, int playerX, int playerY, boolean showingMenu,
                                    String currentMenuType, List<String> currentMenuItems) throws IOException {
         TextGraphics graphics = screen.newTextGraphics();
@@ -145,133 +95,276 @@ public class ScreenManager {
 
         DungeonLevel level = Controller.getCurrentLevel();
 
-        renderMap(graphics, level);
-        renderPlayer(graphics, playerX, playerY);
-        renderUIPanel(graphics);
+        renderMap(graphics, level);          // карта
+        renderPlayer(graphics, playerX, playerY); // игрок
+        renderUIPanel(graphics);             // правая панель статистики
 
         if (showingMenu) {
             drawMenu(screen, graphics, currentMenuType, currentMenuItems);
         }
 
-        renderControlsHint(graphics);
+        // подсказка внизу
+        drawStringCentered(TextColor.ANSI.WHITE, graphics,
+                "WASD to move | J/K/H/E to use items | ESC to quit", 0,
+                screen.getTerminalSize().getRows() - 3, screen.getTerminalSize().getColumns());
         screen.refresh();
     }
 
-    private static void renderMap(TextGraphics graphics, DungeonLevel level) {
+    // таблица рекордов
+    public static void renderScoreboardScreen(Screen screen, List<ScoreEntry> scores) throws IOException {
+        screen.clear();
+        TextGraphics g = screen.newTextGraphics();
+
+        int startX = 5;
+        int startY = 5;
+
+        // заголовок
+        drawStringCentered(TextColor.ANSI.GREEN, g, "=== SCOREBOARD ===", 0, startY,
+                screen.getTerminalSize().getColumns());
+
+        // подготовим данные для универсальной drawTable
+        String[] headers = {"Treasures", "Level", "Enemies", "Food",
+                "Elixirs", "Scrolls", "Attacks", "Missed", "Moves"};
+        List<String[]> rows = scores.stream()
+                .limit(10)
+                .map(se -> new String[]{
+                        String.valueOf(se.getTreasures()),
+                        String.valueOf(se.getLevel()),
+                        String.valueOf(se.getEnemiesKilled()),
+                        String.valueOf(se.getFoodUsed()),
+                        String.valueOf(se.getElixirsUsed()),
+                        String.valueOf(se.getScrollsUsed()),
+                        String.valueOf(se.getAttacksMade()),
+                        String.valueOf(se.getAttacksMissed()),
+                        String.valueOf(se.getMovesMade())
+                })
+                .toList();
+
+        drawTable(g, startX, startY + 2, headers, rows, 14);
+
+        // подсказка
+        drawStringCentered(TextColor.ANSI.WHITE, g, "Press ESCAPE to exit...", 0, startY + 25,
+                screen.getTerminalSize().getColumns());
+
+        screen.refresh();
+    }
+
+    // короткое всплывающее сообщение
+    public static void showMessage(Screen screen, String message) {
+        try {
+            TextGraphics g = screen.newTextGraphics();
+            g.setForegroundColor(TextColor.ANSI.YELLOW);
+            g.putString(0, LEVEL_HEIGHT + 5, message);
+            screen.refresh();
+            Thread.sleep(1500);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* --------------------  приватные low-level рисовалки  -------------------- */
+
+    // Рамка
+    private static void drawBox(TextGraphics graphics, int boxX, int boxY, int width, int height,
+                                TextColor fg, TextColor bg) {
+        graphics.setBackgroundColor(bg);
+        graphics.setForegroundColor(fg);
+        graphics.putString(boxX, boxY, "┌" + "─".repeat(width - 2) + "┐");
+        graphics.putString(boxX, boxY + height - 1, "└" + "─".repeat(width - 2) + "┘");
+        for (int y = boxY + 1; y < boxY + height - 1; y++) {
+            graphics.setCharacter(boxX, y, '│');
+            graphics.setCharacter(boxX + width - 1, y, '│');
+        }
+    }
+
+    // ASCII-арт, центрированный в заданном прямоугольнике
+    private static void drawAsciiArtCentered(TextGraphics g,
+                                             String[] lines,
+                                             TextColor color,
+                                             int areaX, int areaY,
+                                             int areaW, int areaH) {
+
+        g.setForegroundColor(color);
+
+        // верхняя строка - выравниваем по ширине области
+        String first = lines[0].trim();
+        int startX = areaX + (areaW - first.length()) / 2;
+        int startY = areaY + (areaH - lines.length) / 2;
+
+        // рисуем все строки, начиная с одного и того же X
+        for (int i = 0; i < lines.length; i++) {
+            g.putString(startX, startY + i, lines[i]);
+        }
+    }
+
+
+    // Одна строка по центру
+    private static void drawStringCentered(TextColor.ANSI color, TextGraphics g, String text,
+                                           int areaX, int y, int areaW) {
+        g.setForegroundColor(color);
+        g.putString(areaX + (areaW - text.length()) / 2, y, text);
+    }
+
+    // Таблица
+    private static void drawTable(TextGraphics g, int x, int y,
+                                  String[] headers, List<String[]> rows, int columnWidth) {
+        TextColor headerColor = TextColor.ANSI.WHITE;
+        TextColor lineColor = TextColor.ANSI.WHITE_BRIGHT;
+
+        // заголовки
+        g.setForegroundColor(headerColor);
+        int shift = 0;
+        for (String h : headers) {
+            g.putString(x + shift, y, String.format("%-" + columnWidth + "s", h));
+            shift += columnWidth;
+        }
+        // разделитель
+        g.setForegroundColor(lineColor);
+        g.putString(x, y + 1, "─".repeat(headers.length * columnWidth));
+
+        // данные
+        g.setForegroundColor(TextColor.ANSI.WHITE);
+        for (int r = 0; r < rows.size(); r++) {
+            shift = 0;
+            for (int c = 0; c < headers.length; c++) {
+                g.putString(x + shift, y + 2 + r,
+                        String.format("%-" + columnWidth + "s", rows.get(r)[c]));
+                shift += columnWidth;
+            }
+        }
+    }
+
+    /* ---------------  внутренняя логика уровня и UI  --------------- */
+
+    private static void renderMap(TextGraphics g, DungeonLevel level) {
         for (int y = 0; y < LEVEL_HEIGHT; y++) {
             for (int x = 0; x < LEVEL_WIDTH; x++) {
                 TileType tile = level.getTile(x, y);
                 boolean isSeen = Controller.isExplored(x, y);
                 boolean isVisibleNow = Controller.isCurrentlyVisible(x, y);
 
-                renderTile(graphics, tile, x, y, isSeen, isVisibleNow, level);
+                renderTile(g, tile, x, y, isSeen, isVisibleNow, level);
             }
         }
-
-        renderKeys(graphics, level);
+        renderKeys(g, level);
     }
 
-    private static void renderTile(TextGraphics graphics, TileType tile, int x, int y,
+    private static void renderTile(TextGraphics g, TileType tile, int x, int y,
                                    boolean isSeen, boolean isVisibleNow, DungeonLevel level) {
         if (isVisibleNow) {
-            drawVisibleTile(graphics, tile, x, y, level);
+            drawVisibleTile(g, tile, x, y, level);
         } else if (isSeen) {
-            drawExploredTile(graphics, tile, x, y);
+            drawExploredTile(g, tile, x, y);
         } else {
-            drawUnexploredTile(graphics, x, y);
+            drawUnexploredTile(g, x, y);
         }
     }
 
-    private static void drawVisibleTile(TextGraphics graphics, TileType tile, int x, int y, DungeonLevel level) {
+    private static void drawVisibleTile(TextGraphics g, TileType tile, int x, int y, DungeonLevel level) {
         switch (tile) {
             case WALL:
-                graphics.setForegroundColor(TextColor.ANSI.WHITE);
-                graphics.setCharacter(x, y, '#');
+                g.setForegroundColor(TextColor.ANSI.WHITE);
+                g.setCharacter(x, y, '#');
                 break;
             case FLOOR:
-                graphics.setForegroundColor(TextColor.ANSI.GREEN);
-                graphics.setCharacter(x, y, '.');
+                g.setForegroundColor(TextColor.ANSI.GREEN);
+                g.setCharacter(x, y, '.');
                 break;
             case CORRIDOR:
-                graphics.setForegroundColor(TextColor.ANSI.YELLOW);
-                graphics.setCharacter(x, y, '.');
+                g.setForegroundColor(TextColor.ANSI.YELLOW);
+                g.setCharacter(x, y, '.');
                 break;
             case DOOR:
-                renderDoor(graphics, x, y, level);
+                renderDoor(g, x, y, level);
                 break;
             default:
-                graphics.setForegroundColor(TextColor.ANSI.WHITE);
-                graphics.setCharacter(x, y, '?');
+                g.setForegroundColor(TextColor.ANSI.WHITE);
+                g.setCharacter(x, y, '?');
         }
     }
 
-    private static void renderDoor(TextGraphics graphics, int x, int y, DungeonLevel level) {
+    private static void renderDoor(TextGraphics g, int x, int y, DungeonLevel level) {
         Position pos = new Position(x, y);
         var door = level.getDoors().get(pos);
-
         if (door != null && door.locked) {
-            graphics.setForegroundColor(getDoorColor(door.color));
-            graphics.setCharacter(x, y, 'D');
+            g.setForegroundColor(getDoorColor(door.color));
+            g.setCharacter(x, y, 'D');
         } else {
-            graphics.setForegroundColor(TextColor.ANSI.CYAN);
-            graphics.setCharacter(x, y, '+');
+            g.setForegroundColor(TextColor.ANSI.CYAN);
+            g.setCharacter(x, y, '+');
         }
     }
 
-    private static void drawExploredTile(TextGraphics graphics, TileType tile, int x, int y) {
+    private static void drawExploredTile(TextGraphics g, TileType tile, int x, int y) {
         if (tile == TileType.WALL) {
-            graphics.setForegroundColor(TextColor.ANSI.WHITE);
-            graphics.setCharacter(x, y, '#');
+            g.setForegroundColor(TextColor.ANSI.WHITE);
+            g.setCharacter(x, y, '#');
         } else {
-            graphics.setForegroundColor(TextColor.ANSI.BLACK);
-            graphics.setCharacter(x, y, ' ');
+            g.setForegroundColor(TextColor.ANSI.BLACK);
+            g.setCharacter(x, y, ' ');
         }
     }
 
-    private static void drawUnexploredTile(TextGraphics graphics, int x, int y) {
-        graphics.setForegroundColor(TextColor.ANSI.BLACK);
-        graphics.setCharacter(x, y, ' ');
+    private static void drawUnexploredTile(TextGraphics g, int x, int y) {
+        g.setForegroundColor(TextColor.ANSI.BLACK);
+        g.setCharacter(x, y, ' ');
     }
 
-    private static void renderKeys(TextGraphics graphics, DungeonLevel level) {
-        for (var entry : level.getKeysOnGround().entrySet()) {
-            Position pos = entry.getKey();
+    private static void renderKeys(TextGraphics g, DungeonLevel level) {
+        level.getKeysOnGround().forEach((pos, color) -> {
             if (Controller.isVisible(pos.x, pos.y)) {
-                graphics.setForegroundColor(getKeyColor(entry.getValue()));
-                graphics.setCharacter(pos.x, pos.y, 'K');
+                g.setForegroundColor(getKeyColor(color));
+                g.setCharacter(pos.x, pos.y, 'K');
             }
-        }
+        });
     }
 
-    private static void renderPlayer(TextGraphics graphics, int playerX, int playerY) {
-        graphics.setForegroundColor(TextColor.ANSI.WHITE);
-        graphics.setCharacter(playerX, playerY, '@');
+    private static void renderPlayer(TextGraphics g, int playerX, int playerY) {
+        g.setForegroundColor(TextColor.ANSI.WHITE);
+        g.setCharacter(playerX, playerY, '@');
     }
 
-    private static void renderUIPanel(TextGraphics graphics) {
+    private static void renderUIPanel(TextGraphics g) {
         int x = LEVEL_WIDTH + 2;
         int y = 1;
 
-        graphics.putString(x, y++, "LVL: 1");
-        graphics.putString(x, y++, "Gold: 88");
-        graphics.putString(x, y++, "Health: 188.00/500");
-        graphics.putString(x, y++, "Agility: 70");
-        graphics.putString(x, y++, "Strength: 70");
+        g.putString(x, y++, "LVL: 1");
+        g.putString(x, y++, "Gold: 88");
+        g.putString(x, y++, "Health: 188.00/500");
+        g.putString(x, y++, "Agility: 70");
+        g.putString(x, y++, "Strength: 70");
         y++;
 
-        graphics.setForegroundColor(TextColor.ANSI.YELLOW);
-        graphics.putString(x, y++, "Backpack:");
-        graphics.setForegroundColor(TextColor.ANSI.WHITE);
-        graphics.putString(x, y++, "Food: 3");
-        graphics.putString(x, y++, "Elixirs: 3");
-        graphics.putString(x, y++, "Weapons: 3");
-        graphics.putString(x, y, "Scrolls: 3");
+        g.setForegroundColor(TextColor.ANSI.YELLOW);
+        g.putString(x, y++, "Backpack:");
+        g.setForegroundColor(TextColor.ANSI.WHITE);
+        g.putString(x, y++, "Food: 3");
+        g.putString(x, y++, "Elixirs: 3");
+        g.putString(x, y++, "Weapons: 3");
+        g.putString(x, y, "Scrolls: 3");
     }
 
-    private static void renderControlsHint(TextGraphics graphics) {
-        graphics.putString(1, 38, "WASD to move | J/K/H/E to use items | ESC to quit");
+    /*private static void renderControlsHint(TextGraphics g) {
+        g.putString(1, 38, "WASD to move | J/K/H/E to use items | ESC to quit");
+    }*/
+
+    private static void drawMenu(Screen screen, TextGraphics g,
+                                 String currentMenuType, List<String> currentMenuItems) {
+        int menuX = 1;
+        int menuY = LEVEL_HEIGHT + 3;
+
+        g.setBackgroundColor(TextColor.ANSI.BLACK);
+        g.setForegroundColor(TextColor.ANSI.WHITE);
+        g.putString(menuX, menuY, "=== " + currentMenuType.toUpperCase() + " ===");
+
+        for (int i = 0; i < currentMenuItems.size(); i++) {
+            g.putString(menuX, menuY + i + 1, (i + 1) + ". " + currentMenuItems.get(i));
+        }
+        g.putString(menuX, menuY + currentMenuItems.size() + 2,
+                "Press 1-" + currentMenuItems.size() + " or ESC to cancel");
     }
 
+    /* ----------------------  вспомогательное  ---------------------- */
 
     private static TextColor getDoorColor(DungeonLevel.DoorColor color) {
         return switch (color) {
@@ -289,82 +382,48 @@ public class ScreenManager {
         };
     }
 
-    private static void drawMenu(Screen screen, TextGraphics graphics, String currentMenuType, List<String> currentMenuItems) {
-        int menuX = 1;
-        int menuY = LEVEL_HEIGHT + 3;
+    // описываем арт-набор для каждого типа сообщений
+    private record MessageDesc(String[] art, TextColor color, String prompt) {    }
 
-        graphics.setBackgroundColor(TextColor.ANSI.BLACK);
-        graphics.setForegroundColor(TextColor.ANSI.WHITE);
-        graphics.putString(menuX, menuY, "=== " + currentMenuType.toUpperCase() + " ===");
-
-        for (int i = 0; i < currentMenuItems.size(); i++) {
-            graphics.putString(menuX, menuY + i + 1, (i + 1) + ". " + currentMenuItems.get(i));
-        }
-
-        graphics.putString(menuX, menuY + currentMenuItems.size() + 2, "Press 1-" + currentMenuItems.size() + " or ESC to cancel");
+    private static MessageDesc buildMessageDesc(MessageType type) {
+        return switch (type) {
+            case START -> new MessageDesc(START_ART, TextColor.ANSI.GREEN,
+                    "Press any key to continue...");
+            case VICTORY -> new MessageDesc(VICTORY_ART, TextColor.ANSI.GREEN,
+                    "Congratulations! Press any key to continue...");
+            case DEFEAT -> new MessageDesc(DEFEAT_ART, TextColor.ANSI.RED,
+                    "You have fallen... Press any key to continue...");
+        };
     }
 
-    public static void showMessage(Screen screen, String message) {
-        try {
-            TextGraphics graphics = screen.newTextGraphics();
-            graphics.setForegroundColor(TextColor.ANSI.YELLOW);
-            graphics.putString(0, LEVEL_HEIGHT + 5, message);
-            screen.refresh();
-            Thread.sleep(1500);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    /* ----------------------  ASCII-арт  ---------------------- */
+    private static final String[] START_ART = {
+            "R R R       O O       G G G     U     U    E E E",
+            "R     R   O     O   G       G   U     U    E    ",
+            "R     R   O     O   G           U     U    E E E",
+            "R R R     O     O   G   G G G   U     U    E    ",
+            "R    R    O     O   G       G   U     U    E    ",
+            "R     R     O O       G G G      U U U     E E E"
+    };
 
-    public static void renderScoreboardScreen(Screen screen, List<ScoreEntry> scores) throws IOException {
-        screen.clear();
-        TextGraphics graphics = screen.newTextGraphics();
+    private static final String[] VICTORY_ART = {
+            "Y     Y     O O      U     U        W           W    I    N       N      !!!",
+            " Y   Y    O     O    U     U        W     W     W    I    N N     N      !!!",
+            "  Y Y    O       O   U     U        W    W W    W    I    N  N    N      !!!",
+            "   Y     O       O   U     U         W   W W   W     I    N   N   N      !!!",
+            "   Y      O     O    U     U          W W   W W      I    N    N  N         ",
+            "   Y        O O       U U U            W     W       I    N     N N      !!!"
+    };
 
-        // Заголовок
-        graphics.setForegroundColor(TextColor.ANSI.WHITE);
-        int startX = 5;
-        int startY = 5;
-        graphics.putString(startX, startY, "=== SCOREBOARD ===");
+    private static final String[] DEFEAT_ART = {
+            "Y     Y     O O      U     U       D D      E E E        A       D D    ",
+            " Y   Y    O     O    U     U       D    D   E           A A      D    D ",
+            "  Y Y    O       O   U     U       D     D  E E E      A   A     D     D",
+            "   Y     O       O   U     U       D     D  E         A A A A    D     D",
+            "   Y      O     O    U     U       D    D   E        A       A   D    D ",
+            "   Y        O O       U U U        D D      E E E   A         A  D D    "
+    };
 
-        // Заголовки столбцов
-        int fieldSize = 14;
-        int y = startY + 2;
-        graphics.putString(startX, y, String.format("%-" + fieldSize + "s", "Treasures"));
-        graphics.putString(startX + fieldSize, y, String.format("%-" + fieldSize + "s", "Level"));
-        graphics.putString(startX + 2 * fieldSize, y, String.format("%-" + fieldSize + "s", "Enemies"));
-        graphics.putString(startX + 3 * fieldSize, y, String.format("%-" + fieldSize + "s", "Food"));
-        graphics.putString(startX + 4 * fieldSize, y, String.format("%-" + fieldSize + "s", "Elixirs"));
-        graphics.putString(startX + 5 * fieldSize, y, String.format("%-" + fieldSize + "s", "Scrolls"));
-        graphics.putString(startX + 6 * fieldSize, y, String.format("%-" + fieldSize + "s", "Attacks"));
-        graphics.putString(startX + 7 * fieldSize, y, String.format("%-" + fieldSize + "s", "Missed"));
-        graphics.putString(startX + 8 * fieldSize, y, String.format("%-" + fieldSize + "s", "Moves"));
-
-        // Разделительная линия
-        y += 1;
-        for (int i = 0; i < 9 * fieldSize; i++) {
-            graphics.setCharacter(startX + i, y, '-');
-        }
-
-        // Данные
-        y += 1;
-        for (int i = 0; i < Math.min(scores.size(), 10); i++) { // Показываем топ-10
-            ScoreEntry entry = scores.get(i);
-            graphics.putString(startX, y + i, String.format("%-" + fieldSize + "d", entry.getTreasures()));
-            graphics.putString(startX + fieldSize, y + i, String.format("%-" + fieldSize + "d", entry.getLevel()));
-            graphics.putString(startX + 2 * fieldSize, y + i, String.format("%-" + fieldSize + "d", entry.getEnemiesKilled()));
-            graphics.putString(startX + 3 * fieldSize, y + i, String.format("%-" + fieldSize + "d", entry.getFoodUsed()));
-            graphics.putString(startX + 4 * fieldSize, y + i, String.format("%-" + fieldSize + "d", entry.getElixirsUsed()));
-            graphics.putString(startX + 5 * fieldSize, y + i, String.format("%-" + fieldSize + "d", entry.getScrollsUsed()));
-            graphics.putString(startX + 6 * fieldSize, y + i, String.format("%-" + fieldSize + "d", entry.getAttacksMade()));
-            graphics.putString(startX + 7 * fieldSize, y + i, String.format("%-" + fieldSize + "d", entry.getAttacksMissed()));
-            graphics.putString(startX + 8 * fieldSize, y + i, String.format("%-" + fieldSize + "d", entry.getMovesMade()));
-        }
-
-        // Подсказка
-        y += 10;
-        graphics.setForegroundColor(TextColor.ANSI.YELLOW);
-        graphics.putString(startX, y, "Press ESCAPE to exit...");
-
-        screen.refresh();
-    }
+    /* ----------------------  типы сообщений  ---------------------- */
+    public enum MessageType {START, VICTORY, DEFEAT}
 }

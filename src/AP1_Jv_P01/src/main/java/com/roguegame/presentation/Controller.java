@@ -139,7 +139,7 @@ public class Controller {
                 }
                 break;
         }
-        // Проверка на победу
+        // Проверка на переход на следующий уровень
         if (playerX == currentLevel.getExitPosition().x &&
                 playerY == currentLevel.getExitPosition().y) {
             ScreenManager.showMessage(screen, "You found the exit! Next level!");
@@ -147,7 +147,7 @@ public class Controller {
         }
 
         // Проверка на смерть (для теста)
-        if (playerX == 0 && playerY == 0) {
+        if (playerX == playerY /*8 && playerY == 8*/) {
             currentState = GameState.DEAD_SCREEN;
         }
     }

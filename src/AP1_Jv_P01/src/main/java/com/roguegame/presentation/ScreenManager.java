@@ -4,22 +4,26 @@ import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
 import com.roguegame.domain.DungeonLevel;
-import com.roguegame.domain.DungeonLevel.Position;
-import com.roguegame.domain.GameMap.TileType;
 import com.roguegame.domain.ScoreEntry;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
+/**
+ * Отрисовка всех экранов: старт, меню, победа, поражение, рекорды, игра.
+ * НЕ отрисовывает игровой процесс — делегирует это GameRenderer.
+ */
 public class ScreenManager {
 
     /* --------------------------  константы  -------------------------- */
     public static final int LEVEL_WIDTH = DungeonLevel.WIDTH;
     public static final int LEVEL_HEIGHT = DungeonLevel.HEIGHT;
-    public static final int VIEW_RADIUS = Controller.VIEW_RADIUS;
-
+    public static final int TERMINAL_WIDTH = Presentation.TERMINAL_WIDTH;
+    public static final int TERMINAL_HEIGHT = Presentation.TERMINAL_HEIGHT;
 
     /* ----------------------  публичный high-level API  --------------- */
+
     // полноэкранные сообщения (старт/победа/поражение)
     public static void renderFullscreenMessage(Screen screen, MessageType type) throws IOException {
         screen.clear();
@@ -28,13 +32,11 @@ public class ScreenManager {
 
         MessageDesc desc = buildMessageDesc(type);
 
-        // рисуем ASCII-арт, центрированный в верхней части экрана
-        drawAsciiArtCentered(graphics, desc.art(), desc.color(), 0, 0,
-                screen.getTerminalSize().getColumns(), 24);
+        // ASCII-арт, центрированный в верхней части экрана
+        drawAsciiArtCentered(graphics, desc.art(), desc.color(), 0, 0, TERMINAL_WIDTH, 24);
 
         // подсказка
-        drawStringCentered(TextColor.ANSI.WHITE, graphics, desc.prompt(), 0,
-                screen.getTerminalSize().getRows() - 15, screen.getTerminalSize().getColumns());
+        drawStringCentered(TextColor.ANSI.WHITE, graphics, desc.prompt(), 0, TERMINAL_HEIGHT - 15, TERMINAL_WIDTH);
 
         screen.refresh();
     }
@@ -62,15 +64,14 @@ public class ScreenManager {
 
         // заголовок
         drawStringCentered(TextColor.ANSI.GREEN, graphics, "GAME MENU", 0, 5,
-                screen.getTerminalSize().getColumns());
+                TERMINAL_WIDTH);
 
         // рамка
         int boxX = (screen.getTerminalSize().getColumns() - " <<<SCOREBOARD>>> ".length()) / 2;
         int boxY = 6;
-        int boxW = "<<<SCOREBOARD>>>".length()+2;
+        int boxW = "<<<SCOREBOARD>>>".length() + 2;
         int boxH = 8;
-        drawBox(graphics, boxX, boxY, boxW, boxH,
-                TextColor.ANSI.WHITE, TextColor.ANSI.BLACK);
+        drawBox(graphics, boxX, boxY, boxW, boxH, TextColor.ANSI.WHITE, TextColor.ANSI.BLACK);
 
         // пункты меню
         String[] items = {"NEW GAME", "LOAD GAME", "SCOREBOARD", "EXIT GAME"};
@@ -93,11 +94,10 @@ public class ScreenManager {
         TextGraphics graphics = screen.newTextGraphics();
         screen.clear();
 
-        DungeonLevel level = Controller.getCurrentLevel();
-
-        renderMap(graphics, level);          // карта
-        renderPlayer(graphics, playerX, playerY); // игрок
-        renderUIPanel(graphics);             // правая панель статистики
+        // Отрисовка карты и игрока — делегировано GameRenderer
+        GameRenderer.renderMap(graphics, Controller.getCurrentLevel());
+        GameRenderer.renderPlayer(graphics, playerX, playerY);
+        GameRenderer.renderUIPanel(graphics);
 
         if (showingMenu) {
             drawMenu(screen, graphics, currentMenuType, currentMenuItems);
@@ -106,7 +106,8 @@ public class ScreenManager {
         // подсказка внизу
         drawStringCentered(TextColor.ANSI.WHITE, graphics,
                 "WASD to move | J/K/H/E to use items | ESC to quit", 0,
-                screen.getTerminalSize().getRows() - 3, screen.getTerminalSize().getColumns());
+                TERMINAL_HEIGHT - 3, screen.getTerminalSize().getColumns());
+
         screen.refresh();
     }
 
@@ -119,8 +120,7 @@ public class ScreenManager {
         int startY = 5;
 
         // заголовок
-        drawStringCentered(TextColor.ANSI.GREEN, g, "=== SCOREBOARD ===", 0, startY,
-                screen.getTerminalSize().getColumns());
+        drawStringCentered(TextColor.ANSI.GREEN, g, "=== SCOREBOARD ===", 0, startY, TERMINAL_WIDTH);
 
         // подготовим данные для универсальной drawTable
         String[] headers = {"Treasures", "Level", "Enemies", "Food",
@@ -143,8 +143,7 @@ public class ScreenManager {
         drawTable(g, startX, startY + 2, headers, rows, 14);
 
         // подсказка
-        drawStringCentered(TextColor.ANSI.WHITE, g, "Press ESCAPE to exit...", 0, startY + 25,
-                screen.getTerminalSize().getColumns());
+        drawStringCentered(TextColor.ANSI.WHITE, g, "Press ESCAPE to exit...", 0, startY + 25, TERMINAL_WIDTH);
 
         screen.refresh();
     }
@@ -186,17 +185,14 @@ public class ScreenManager {
 
         g.setForegroundColor(color);
 
-        // верхняя строка - выравниваем по ширине области
         String first = lines[0].trim();
         int startX = areaX + (areaW - first.length()) / 2;
         int startY = areaY + (areaH - lines.length) / 2;
 
-        // рисуем все строки, начиная с одного и того же X
         for (int i = 0; i < lines.length; i++) {
             g.putString(startX, startY + i, lines[i]);
         }
     }
-
 
     // Одна строка по центру
     private static void drawStringCentered(TextColor.ANSI color, TextGraphics g, String text,
@@ -234,120 +230,6 @@ public class ScreenManager {
         }
     }
 
-    /* ---------------  внутренняя логика уровня и UI  --------------- */
-
-    private static void renderMap(TextGraphics g, DungeonLevel level) {
-        for (int y = 0; y < LEVEL_HEIGHT; y++) {
-            for (int x = 0; x < LEVEL_WIDTH; x++) {
-                TileType tile = level.getTile(x, y);
-                boolean isSeen = Controller.isExplored(x, y);
-                boolean isVisibleNow = Controller.isCurrentlyVisible(x, y);
-
-                renderTile(g, tile, x, y, isSeen, isVisibleNow, level);
-            }
-        }
-        renderKeys(g, level);
-    }
-
-    private static void renderTile(TextGraphics g, TileType tile, int x, int y,
-                                   boolean isSeen, boolean isVisibleNow, DungeonLevel level) {
-        if (isVisibleNow) {
-            drawVisibleTile(g, tile, x, y, level);
-        } else if (isSeen) {
-            drawExploredTile(g, tile, x, y);
-        } else {
-            drawUnexploredTile(g, x, y);
-        }
-    }
-
-    private static void drawVisibleTile(TextGraphics g, TileType tile, int x, int y, DungeonLevel level) {
-        switch (tile) {
-            case WALL:
-                g.setForegroundColor(TextColor.ANSI.WHITE);
-                g.setCharacter(x, y, '#');
-                break;
-            case FLOOR:
-                g.setForegroundColor(TextColor.ANSI.GREEN);
-                g.setCharacter(x, y, '.');
-                break;
-            case CORRIDOR:
-                g.setForegroundColor(TextColor.ANSI.YELLOW);
-                g.setCharacter(x, y, '.');
-                break;
-            case DOOR:
-                renderDoor(g, x, y, level);
-                break;
-            default:
-                g.setForegroundColor(TextColor.ANSI.WHITE);
-                g.setCharacter(x, y, '?');
-        }
-    }
-
-    private static void renderDoor(TextGraphics g, int x, int y, DungeonLevel level) {
-        Position pos = new Position(x, y);
-        var door = level.getDoors().get(pos);
-        if (door != null && door.locked) {
-            g.setForegroundColor(getDoorColor(door.color));
-            g.setCharacter(x, y, 'D');
-        } else {
-            g.setForegroundColor(TextColor.ANSI.CYAN);
-            g.setCharacter(x, y, '+');
-        }
-    }
-
-    private static void drawExploredTile(TextGraphics g, TileType tile, int x, int y) {
-        if (tile == TileType.WALL) {
-            g.setForegroundColor(TextColor.ANSI.WHITE);
-            g.setCharacter(x, y, '#');
-        } else {
-            g.setForegroundColor(TextColor.ANSI.BLACK);
-            g.setCharacter(x, y, ' ');
-        }
-    }
-
-    private static void drawUnexploredTile(TextGraphics g, int x, int y) {
-        g.setForegroundColor(TextColor.ANSI.BLACK);
-        g.setCharacter(x, y, ' ');
-    }
-
-    private static void renderKeys(TextGraphics g, DungeonLevel level) {
-        level.getKeysOnGround().forEach((pos, color) -> {
-            if (Controller.isVisible(pos.x, pos.y)) {
-                g.setForegroundColor(getKeyColor(color));
-                g.setCharacter(pos.x, pos.y, 'K');
-            }
-        });
-    }
-
-    private static void renderPlayer(TextGraphics g, int playerX, int playerY) {
-        g.setForegroundColor(TextColor.ANSI.WHITE);
-        g.setCharacter(playerX, playerY, '@');
-    }
-
-    private static void renderUIPanel(TextGraphics g) {
-        int x = LEVEL_WIDTH + 2;
-        int y = 1;
-
-        g.putString(x, y++, "LVL: 1");
-        g.putString(x, y++, "Gold: 88");
-        g.putString(x, y++, "Health: 188.00/500");
-        g.putString(x, y++, "Agility: 70");
-        g.putString(x, y++, "Strength: 70");
-        y++;
-
-        g.setForegroundColor(TextColor.ANSI.YELLOW);
-        g.putString(x, y++, "Backpack:");
-        g.setForegroundColor(TextColor.ANSI.WHITE);
-        g.putString(x, y++, "Food: 3");
-        g.putString(x, y++, "Elixirs: 3");
-        g.putString(x, y++, "Weapons: 3");
-        g.putString(x, y, "Scrolls: 3");
-    }
-
-    /*private static void renderControlsHint(TextGraphics g) {
-        g.putString(1, 38, "WASD to move | J/K/H/E to use items | ESC to quit");
-    }*/
-
     private static void drawMenu(Screen screen, TextGraphics g,
                                  String currentMenuType, List<String> currentMenuItems) {
         int menuX = 1;
@@ -364,26 +246,9 @@ public class ScreenManager {
                 "Press 1-" + currentMenuItems.size() + " or ESC to cancel");
     }
 
-    /* ----------------------  вспомогательное  ---------------------- */
-
-    private static TextColor getDoorColor(DungeonLevel.DoorColor color) {
-        return switch (color) {
-            case RED -> TextColor.ANSI.RED;
-            case BLUE -> TextColor.ANSI.BLUE;
-            case YELLOW -> TextColor.ANSI.YELLOW;
-        };
-    }
-
-    private static TextColor getKeyColor(DungeonLevel.DoorColor color) {
-        return switch (color) {
-            case RED -> TextColor.ANSI.RED_BRIGHT;
-            case BLUE -> TextColor.ANSI.BLUE_BRIGHT;
-            case YELLOW -> TextColor.ANSI.YELLOW_BRIGHT;
-        };
-    }
-
     // описываем арт-набор для каждого типа сообщений
-    private record MessageDesc(String[] art, TextColor color, String prompt) {    }
+    private record MessageDesc(String[] art, TextColor color, String prompt) {
+    }
 
     private static MessageDesc buildMessageDesc(MessageType type) {
         return switch (type) {

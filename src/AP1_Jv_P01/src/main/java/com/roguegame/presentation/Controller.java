@@ -19,33 +19,24 @@ import static com.roguegame.domain.DungeonLevel.WIDTH;
 
 public class Controller {
     public Controller() {
-        DungeonLevel level = new DungeonLevel();
-        DungeonLevel.Position start = level.getStartPosition();
-        Character player = new Character(start.x, start.y);
-        LevelGenerator lg = new LevelGenerator(level);
-        world = new World(player, level, level.getKeysOnGround());
-        world.setEnemies(lg.generateLevelEnemies(
-                world.getLevelNumber(), world.getStruggleCounter()
-        ));
-        world.setItems(lg.generateLevelItems(
-                world.getLevelNumber(), world.getStruggleCounter()
-        ));
+        world = new World();
+        Character player = world.getPlayer();
         turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_MAX_HEALTH, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_AGILITY, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_STRENGTH, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_MEDIUM, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_BIG, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_SMALL, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_AGILITY, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_STRENGTH, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_MAX_HEALTH, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.AXE, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SWORD, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MACE, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_BIG, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_MEDIUM, 0, 0));
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_SMALL, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_MAX_HEALTH, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_AGILITY, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_STRENGTH, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_MEDIUM, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_BIG, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_SMALL, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_AGILITY, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_STRENGTH, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_MAX_HEALTH, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.AXE, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SWORD, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MACE, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_BIG, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_MEDIUM, 0, 0));
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_SMALL, 0, 0));
 
     }
 
@@ -146,7 +137,7 @@ public class Controller {
     public static final int VIEW_RADIUS = 7; // Радиус видимости
 
     // Исследованные клетки (для тумана войны)
-    private static boolean[][] explored = new boolean[WIDTH][HEIGHT];
+    private boolean[][] explored = new boolean[WIDTH][HEIGHT];
 
     public Character getPlayer() {
         return world.getPlayer();
@@ -222,10 +213,26 @@ public class Controller {
                 return;
             case Character:
                 char c = key.getCharacter();
-                if (c == 'w' || c == 'W') world.tryToMove(player, GameMap.Direction.UP);
-                if (c == 's' || c == 'S') world.tryToMove(player, GameMap.Direction.DOWN);
-                if (c == 'a' || c == 'A') world.tryToMove(player, GameMap.Direction.LEFT);
-                if (c == 'd' || c == 'D') world.tryToMove(player, GameMap.Direction.RIGHT);
+                if (c == 'w' || c == 'W') {
+                    world.tryToMove(player, GameMap.Direction.UP);
+                    calculateFOV();
+                    updateExplored();
+                }
+                if (c == 's' || c == 'S') {
+                    world.tryToMove(player, GameMap.Direction.DOWN);
+                    calculateFOV();
+                    updateExplored();
+                }
+                if (c == 'a' || c == 'A'){
+                    world.tryToMove(player, GameMap.Direction.LEFT);
+                    calculateFOV();
+                    updateExplored();
+                }
+                if (c == 'd' || c == 'D') {
+                    world.tryToMove(player, GameMap.Direction.RIGHT);
+                    calculateFOV();
+                    updateExplored();
+                }
 
                 if (c == 'j' || c == 'J') {
                     openMenu("food", player.getBackpack().getItems().stream().
@@ -249,7 +256,9 @@ public class Controller {
         if (world.getPlayer().getPosX() == world.getLevel().getExitPosition().x &&
                 world.getPlayer().getPosY() == world.getLevel().getExitPosition().y) {
             ScreenManager.showMessage(screen, "You found the exit! Next level!");
-            currentState = GameState.ENDGAME_SCREEN; // уточнить !!!
+//            currentState = GameState.ENDGAME_SCREEN; // уточнить !!!
+            world.initNewLevel();
+            resetGame();
         }
 
         // Проверка на смерть (для теста)
@@ -353,24 +362,7 @@ public class Controller {
     // Сброс исследованных клеток при новой игре
     private void resetGame() {
         Character player = world.getPlayer();
-        world.setLevel(new DungeonLevel());// Генерируем новый уровень
-        world.getItems().clear();
-        world.getEnemies().clear();
-        Position start = world.getLevel().getStartPosition();
-        player.setPosX(start.x);
-        player.setPosY(start.y);
-        player.getKeys().clear();
-        world.setLevelNumber(world.getLevelNumber() + 1);
-        LevelGenerator lg = new LevelGenerator(world.getLevel());
-        world.setEnemies(lg.generateLevelEnemies(
-                world.getLevelNumber(), world.getStruggleCounter()
-        ));
-        world.setItems(lg.generateLevelItems(
-                world.getLevelNumber(), world.getStruggleCounter()
-        ));
         turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());
-        world.scaleEnemiesStrength(world.getLevelNumber(), world.getEnemies());
-
         // Сброс массива исследованных клеток
         for (int x = 0; x < WIDTH; x++) {
             for (int y = 0; y < HEIGHT; y++) {
@@ -385,7 +377,7 @@ public class Controller {
     }
 
     // Массив текущей видимости (что видно прямо сейчас) FOV = field of view
-    private static boolean[][] currentFOV = new boolean[WIDTH][HEIGHT];
+    private final boolean[][] currentFOV = new boolean[WIDTH][HEIGHT];
 
     // Максимальная дистанция видимости (можно настроить)
     private static final int MAX_FOV_DISTANCE = 15;
@@ -457,7 +449,7 @@ public class Controller {
     }
 
     // Метод для проверки, видна ли клетка прямо сейчас
-    public static boolean isCurrentlyVisible(int x, int y) {
+    public boolean isCurrentlyVisible(int x, int y) {
         return currentFOV[x][y];
     }
 
@@ -486,7 +478,7 @@ public class Controller {
         return currentMenuLine;
     }
 
-    public static boolean isExplored(int x, int y) {
+    public boolean isExplored(int x, int y) {
         return explored[x][y];
     }
 }

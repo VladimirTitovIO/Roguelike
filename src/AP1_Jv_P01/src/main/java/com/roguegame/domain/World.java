@@ -53,14 +53,31 @@ public class World {
         this.struggleCounter = struggleCounter;
     }
 
-    public World(Character player, DungeonLevel level,  Map<DungeonLevel.Position, DungeonLevel.DoorColor> keys) {
-        enemies = getEnemies();
-        items = getItems();
-        this.player = player;
-        this.level = level;
+    public World() {
+        level = new DungeonLevel();
+        keys = level.getKeysOnGround();
         levelNumber = 1;
-        this.keys = keys;
         struggleCounter = 0.5;
+        DungeonLevel.Position start = level.getStartPosition();
+        player = new Character(start.x, start.y);
+        LevelGenerator lg = new LevelGenerator(level);
+        enemies = lg.generateLevelEnemies(levelNumber, struggleCounter);
+        items = lg.generateLevelItems(levelNumber, struggleCounter);
+    }
+
+    public void initNewLevel() {
+        level = new DungeonLevel();
+        setLevel(level);
+        items.clear();
+        enemies.clear();
+        LevelGenerator lg = new LevelGenerator(level);
+        player.setPosX(level.getStartPosition().x);
+        player.setPosY(level.getStartPosition().y);
+        player.getKeys().clear();
+        setLevelNumber(levelNumber + 1);
+        setItems(lg.generateLevelItems(levelNumber, struggleCounter));
+        setEnemies(lg.generateLevelEnemies(levelNumber, struggleCounter));
+        scaleEnemiesStrength(levelNumber, enemies);
     }
 
     public Enemy getEnemyAtPosition(int x, int y) {

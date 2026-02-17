@@ -1,10 +1,7 @@
 package com.roguegame.domain;
 
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.roguegame.domain.ItemTypes.Subtype;
 
@@ -52,6 +49,14 @@ public class Character extends Entity {
 
     public void setStrength(int strength) {
         this.strength = strength;
+    }
+
+    public int getBaseStrength() {
+        return strength;
+    }
+
+    public int getWeaponStrength() {
+        return  weapon.getStrength();
     }
 
     public int getStrength() {

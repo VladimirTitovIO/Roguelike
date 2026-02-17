@@ -2,11 +2,9 @@ package com.roguegame.domain;
 import com.roguegame.domain.GameMap.Direction;
 
 
-abstract class Entity {
+public abstract class Entity {
     private int posX;
     private int posY;
-    private int width;
-    private int height;
     private int speed;
     private int agility;
     public boolean alive = true;

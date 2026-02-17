@@ -44,7 +44,6 @@ public class Backpack {
         }
         long sizePerType = countPerType(item.getType());
         if (sizePerType >= typeLimits.get(item.getType())) {
-            System.out.println("No more space for items of such type");
             return false;
         }
         items.add(item);

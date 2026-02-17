@@ -479,13 +479,14 @@ public class DungeonLevel implements GameMap {
     @Override
     public TileType getTile(int x, int y) {
         if (!inBounds(x, y)) return TileType.WALL;
+        if (x == getExitPosition().x && y == getExitPosition().y) return TileType.EXIT;
         return tiles[x][y];
     }
 
     @Override
     public boolean isWalkable(int x, int y) {
         TileType t = getTile(x, y);
-        return t == TileType.FLOOR || t == TileType.CORRIDOR || t == TileType.DOOR;
+        return t == TileType.FLOOR || t == TileType.CORRIDOR || t == TileType.DOOR || t == TileType.EXIT;
     }
 
     // -------------------- Public helpers for other game logic --------------------

@@ -62,6 +62,10 @@ public class GameRenderer {
             case DOOR:
                 renderDoor(g, x, y, level);
                 break;
+            case EXIT:
+                g.setForegroundColor(TextColor.ANSI.CYAN);
+                g.setCharacter(x, y, 'E');
+                break;
             default:
                 g.setForegroundColor(TextColor.ANSI.WHITE);
                 g.setCharacter(x, y, '?');
@@ -121,7 +125,7 @@ public class GameRenderer {
 
         Character player = controller.getPlayer();
 
-        g.putString(x, y++, "LVL: " + controller.getLevel());
+        g.putString(x, y++, "LVL: " + controller.getWorld().getLevelNumber());
         g.putString(x, y++, "Gold: " + player.getGold());
         g.putString(x, y++, "Health: " + player.getHealth() + "/" + player.getMaximumHealth());
         g.putString(x, y++, "Agility: " + player.getAgility());

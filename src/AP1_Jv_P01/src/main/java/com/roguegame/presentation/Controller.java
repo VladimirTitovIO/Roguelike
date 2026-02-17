@@ -231,15 +231,6 @@ public class Controller {
         }
     }
 
-    // Метод проверки видимости
-    // упрощённая версия — видим только квадрат вокруг игрока
-    static boolean isVisible(int x, int y) {
-        // Проверяем, находится ли клетка в квадратном радиусе
-        int dx = Math.abs(x - playerX);
-        int dy = Math.abs(y - playerY);
-        return dx <= VIEW_RADIUS && dy <= VIEW_RADIUS;
-    }
-
     // Сброс исследованных клеток при новой игре
     private static void resetGame() {
         currentLevel = new DungeonLevel(); // Генерируем новый уровень

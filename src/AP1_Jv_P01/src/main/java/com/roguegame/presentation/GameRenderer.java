@@ -14,7 +14,6 @@ public class GameRenderer {
 
     public static final int LEVEL_WIDTH = DungeonLevel.WIDTH;
     public static final int LEVEL_HEIGHT = DungeonLevel.HEIGHT;
-    public static final int VIEW_RADIUS = Controller.VIEW_RADIUS;
 
     /**
      * Отрисовывает игровую карту с учётом видимости и освещённости.
@@ -95,7 +94,7 @@ public class GameRenderer {
 
     private static void renderKeys(TextGraphics g, DungeonLevel level) {
         level.getKeysOnGround().forEach((pos, color) -> {
-            if (Controller.isVisible(pos.x, pos.y)) {
+            if (Controller.isCurrentlyVisible(pos.x, pos.y)) {
                 g.setForegroundColor(getKeyColor(color));
                 g.setCharacter(pos.x, pos.y, 'K');
             }

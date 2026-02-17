@@ -3,10 +3,10 @@ package com.roguegame.presentation;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
-import com.roguegame.domain.DungeonLevel;
+import com.roguegame.domain.*;
+import com.roguegame.domain.Character;
 import com.roguegame.domain.DungeonLevel.Position;
 import com.roguegame.domain.GameMap.TileType;
-import com.roguegame.domain.ScoreEntry;
 
 import java.io.IOException;
 import java.util.List;
@@ -88,16 +88,17 @@ public class ScreenManager {
     }
 
     // основной игровой экран
-    public static void renderLevel(Screen screen, int playerX, int playerY, boolean showingMenu,
-                                   String currentMenuType, List<String> currentMenuItems) throws IOException {
+    public static void renderLevel(Screen screen, Controller controller, boolean showingMenu,
+                                   String currentMenuType, List<Item> currentMenuItems) throws IOException {
         TextGraphics graphics = screen.newTextGraphics();
         screen.clear();
 
-        DungeonLevel level = Controller.getCurrentLevel();
+        DungeonLevel level = controller.getLevel();
+        Character player = controller.getPlayer();
 
-        renderMap(graphics, level);          // карта
-        renderPlayer(graphics, playerX, playerY); // игрок
-        renderUIPanel(graphics);             // правая панель статистики
+        renderMap(graphics, level, controller);          // карта
+        renderPlayer(graphics, player.getPosX(), player.getPosY()); // игрок
+        renderUIPanel(graphics, controller);             // правая панель статистики
 
         if (showingMenu) {
             drawMenu(screen, graphics, currentMenuType, currentMenuItems);
@@ -236,7 +237,7 @@ public class ScreenManager {
 
     /* ---------------  внутренняя логика уровня и UI  --------------- */
 
-    private static void renderMap(TextGraphics g, DungeonLevel level) {
+    private static void renderMap(TextGraphics g, DungeonLevel level, Controller controller) {
         for (int y = 0; y < LEVEL_HEIGHT; y++) {
             for (int x = 0; x < LEVEL_WIDTH; x++) {
                 TileType tile = level.getTile(x, y);
@@ -246,7 +247,7 @@ public class ScreenManager {
                 renderTile(g, tile, x, y, isSeen, isVisibleNow, level);
             }
         }
-        renderKeys(g, level);
+        renderKeys(g, level, controller);
     }
 
     private static void renderTile(TextGraphics g, TileType tile, int x, int y,
@@ -310,9 +311,9 @@ public class ScreenManager {
         g.setCharacter(x, y, ' ');
     }
 
-    private static void renderKeys(TextGraphics g, DungeonLevel level) {
+    private static void renderKeys(TextGraphics g, DungeonLevel level, Controller controller) {
         level.getKeysOnGround().forEach((pos, color) -> {
-            if (Controller.isVisible(pos.x, pos.y)) {
+            if (controller.isVisible(pos.x, pos.y)) {
                 g.setForegroundColor(getKeyColor(color));
                 g.setCharacter(pos.x, pos.y, 'K');
             }
@@ -324,24 +325,28 @@ public class ScreenManager {
         g.setCharacter(playerX, playerY, '@');
     }
 
-    private static void renderUIPanel(TextGraphics g) {
+    private static void renderUIPanel(TextGraphics g, Controller controller) {
+        Character player = controller.getPlayer();
         int x = LEVEL_WIDTH + 2;
         int y = 1;
 
-        g.putString(x, y++, "LVL: 1");
-        g.putString(x, y++, "Gold: 88");
-        g.putString(x, y++, "Health: 188.00/500");
-        g.putString(x, y++, "Agility: 70");
-        g.putString(x, y++, "Strength: 70");
+        g.putString(x, y++, "Level:  " + controller.getWorld().getLevelNumber());
+        g.putString(x, y++, "Gold: " + player.getGold());
+        g.putString(x, y++, "Health: " + player.getHealth() + "/" + player.getMaximumHealth());
+        g.putString(x, y++, "Agility: " + player.getAgility());
+        g.putString(x, y++, "Strength: " + player.getBaseStrength() + "(" +
+                player.getWeapon().getSubtype() + ")");
         y++;
 
         g.setForegroundColor(TextColor.ANSI.YELLOW);
         g.putString(x, y++, "Backpack:");
         g.setForegroundColor(TextColor.ANSI.WHITE);
-        g.putString(x, y++, "Food: 3");
-        g.putString(x, y++, "Elixirs: 3");
-        g.putString(x, y++, "Weapons: 3");
-        g.putString(x, y, "Scrolls: 3");
+        g.putString(x, y++, "Food: " + player.getBackpack().getCount(ItemTypes.Type.FOOD));
+        g.putString(x, y++, "Elixirs: " + player.getBackpack().getCount(ItemTypes.Type.ELIXIR));
+        g.putString(x, y++, "Weapons: " + player.getBackpack().getCount(ItemTypes.Type.WEAPON));
+        g.putString(x, y, "Scrolls: " + player.getBackpack().getCount(ItemTypes.Type.SCROLLS));
+        g.putString(x, y, "Medkits: " + player.getBackpack().getCount(ItemTypes.Type.MEDKIT));
+
     }
 
     /*private static void renderControlsHint(TextGraphics g) {
@@ -349,7 +354,7 @@ public class ScreenManager {
     }*/
 
     private static void drawMenu(Screen screen, TextGraphics g,
-                                 String currentMenuType, List<String> currentMenuItems) {
+                                 String currentMenuType, List<Item> currentMenuItems) {
         int menuX = 1;
         int menuY = LEVEL_HEIGHT + 3;
 

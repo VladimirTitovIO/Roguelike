@@ -3,9 +3,10 @@ package com.roguegame.presentation;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
-import com.roguegame.domain.DungeonLevel;
+import com.googlecode.lanterna.terminal.swing.ScrollingSwingTerminal;
+import com.roguegame.domain.*;
+import com.roguegame.domain.Character;
 import com.roguegame.domain.DungeonLevel.Position;
-import com.roguegame.domain.GameMap;
 import com.roguegame.domain.GameMap.TileType;
 //import domain.LeaderboardService;
 
@@ -17,7 +18,102 @@ import static com.roguegame.domain.DungeonLevel.HEIGHT;
 import static com.roguegame.domain.DungeonLevel.WIDTH;
 
 public class Controller {
+    public Controller() {
+        DungeonLevel level = new DungeonLevel();
+        DungeonLevel.Position start = level.getStartPosition();
+        Character player = new Character(start.x, start.y);
+        LevelGenerator lg = new LevelGenerator(level);
+        world = new World(player, level, level.getKeysOnGround());
+        world.setEnemies(lg.generateLevelEnemies(
+                world.getLevelNumber(), world.getStruggleCounter()
+        ));
+        world.setItems(lg.generateLevelItems(
+                world.getLevelNumber(), world.getStruggleCounter()
+        ));
+        turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_MAX_HEALTH, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_AGILITY, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_STRENGTH, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_MEDIUM, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_BIG, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_SMALL, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_AGILITY, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_STRENGTH, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_MAX_HEALTH, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.AXE, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SWORD, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MACE, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_BIG, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_MEDIUM, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_SMALL, 0, 0));
+
+    }
+
+    public int getEnemiesKilled() {
+        return enemiesKilled;
+    }
+
+    public void setEnemiesKilled(int enemiesKilled) {
+        this.enemiesKilled = enemiesKilled;
+    }
+
+    public int getFoodUsed() {
+        return foodUsed;
+    }
+
+    public void setFoodUsed(int foodUsed) {
+        this.foodUsed = foodUsed;
+    }
+
+    public int getElixirsUsed() {
+        return elixirsUsed;
+    }
+
+    public void setElixirsUsed(int elixirsUsed) {
+        this.elixirsUsed = elixirsUsed;
+    }
+
+    public int getScrollsUsed() {
+        return scrollsUsed;
+    }
+
+    public void setScrollsUsed(int scrollsUsed) {
+        this.scrollsUsed = scrollsUsed;
+    }
+
+    public int getAttacksLanded() {
+        return attacksLanded;
+    }
+
+    public void setAttacksLanded(int attacksLanded) {
+        this.attacksLanded = attacksLanded;
+    }
+
+    public int getAttacksMissed() {
+        return attacksMissed;
+    }
+
+    public void setAttacksMissed(int attacksMissed) {
+        this.attacksMissed = attacksMissed;
+    }
+
+    public int getMovesMade() {
+        return movesMade;
+    }
+
+    public void setMovesMade(int movesMade) {
+        this.movesMade = movesMade;
+    }
+
     public enum GameState {
+        MOVEMENT,
+        COMBAT,
+        INVENTORY_WEAPON_SELECT,
+        INVENTORY_FOOD_SELECT,
+        INVENTORY_ELIXIR_SELECT,
+        INVENTORY_MEDKIT_SELECT,
+        INVENTORY_SCROLL_SELECT,
+        INVENTORY_TREASURE_SELECT,
         START_SCREEN,
         MENU_SCREEN,
         GAME_SCREEN,
@@ -26,23 +122,22 @@ public class Controller {
         SCOREBOARD_SCREEN
     }
 
-    private static GameState currentState = GameState.START_SCREEN;
-    private static int currentMenuLine = 0;
-
-    private static int playerX = 0;
-    private static int playerY = 0;
-
-    private static DungeonLevel currentLevel = null;
+    private int enemiesKilled = 0;
+    private int foodUsed = 0;
+    private int elixirsUsed = 0;
+    private int scrollsUsed = 0;
+    private int attacksLanded = 0;
+    private int attacksMissed = 0;
+    private int movesMade = 0;
+    private List<Entity> turnOrder;
+    private final World world;
+    private GameState currentState = GameState.START_SCREEN;
+    private int currentMenuLine = 0;
 
     // Инвентарь (временный хардкод)
-    private static List<String> foodItems = List.of("Хлеб", "Яблоко", "Мясо");
-    private static List<String> elixirItems = List.of("Эликсир силы", "Эликсир ловкости", "Эликсир здоровья");
-    private static List<String> weaponItems = List.of("Меч", "Топор", "Кинжал");
-    private static List<String> scrollItems = List.of("Свиток силы", "Свиток ловкости", "Свиток здоровья");
-
     private static boolean showingMenu = false;
     private static String currentMenuType = "";
-    private static List<String> currentMenuItems = new ArrayList<>();
+    private List<Item> currentMenuItems = new ArrayList<>();
     //private static LeaderboardService leaderboardService = new FileLeaderboardService(); // Реализация разработчика А
 
     // НОВЫЕ ПОЛЯ
@@ -53,17 +148,29 @@ public class Controller {
     // Исследованные клетки (для тумана войны)
     private static boolean[][] explored = new boolean[WIDTH][HEIGHT];
 
+    public Character getPlayer() {
+        return world.getPlayer();
+    }
+
+    public DungeonLevel getLevel() {
+        return world.getLevel();
+    }
+
+    public World getWorld() {
+        return world;
+    }
+
     // Основные методы
 
     // Обработка нажатия клавиши
-    public static void handleInput(KeyStroke key, Screen screen) throws IOException {
+    public void handleInput(KeyStroke key, Screen screen) throws IOException {
         // Обработка ESC для возврата в меню из любого состояния, кроме START_SCREEN
         if (key.getKeyType() == KeyType.Escape && currentState != GameState.START_SCREEN) {
             currentState = GameState.MENU_SCREEN;
             return; // Прерываем дальнейшую обработку
         }
         switch (currentState) {
-            case START_SCREEN:
+            case START_SCREEN, DEAD_SCREEN, ENDGAME_SCREEN:
                 currentState = GameState.MENU_SCREEN;
                 break;
             case MENU_SCREEN:
@@ -77,21 +184,17 @@ public class Controller {
                     currentState = GameState.MENU_SCREEN;
                 }
                 break;
-            case DEAD_SCREEN:
-                currentState = GameState.MENU_SCREEN;
-                break;
-            case ENDGAME_SCREEN:
-                currentState = GameState.MENU_SCREEN;
-                break;
         }
     }
 
     // Обработка нажатия клавиши в меню
-    private static void handleMenuNavigation(KeyStroke key, Screen screen) {
-        if (key.getCharacter() == 'w' || key.getCharacter() == 'W') {
-            currentMenuLine = Math.max(0, currentMenuLine - 1);
-        } else if (key.getCharacter() == 's' || key.getCharacter() == 'S') {
-            currentMenuLine = Math.min(3, currentMenuLine + 1);
+    private void handleMenuNavigation(KeyStroke key, Screen screen) {
+        if (key.getKeyType() == KeyType.Character) {
+            if (key.getCharacter() == 'w' || key.getCharacter() == 'W') {
+                currentMenuLine = Math.max(0, currentMenuLine - 1);
+            } else if (key.getCharacter() == 's' || key.getCharacter() == 'S') {
+                currentMenuLine = Math.min(3, currentMenuLine + 1);
+            }
         } else if (key.getKeyType() == KeyType.Enter) {
             if (currentMenuLine == 0) { // NEW GAME
                 currentState = GameState.GAME_SCREEN;
@@ -103,13 +206,12 @@ public class Controller {
             } else if (currentMenuLine == 3) { // EXIT
                 System.exit(0);
             }
-        } /*else if (key.getKeyType() == KeyType.Escape) {
-            //currentState = GameState.MENU_SCREEN;
-        }*/
+        }
     }
 
     // Обработка нажатия клавиш в игре
-    private static void handleGameInput(KeyStroke key, Screen screen) {
+    private void handleGameInput(KeyStroke key, Screen screen) {
+        Character player = world.getPlayer();
         if (showingMenu) { // меню выбора предметов из рюкзака
             handleMenuInput(key, screen);
             return; // Не обрабатываем движение, пока меню открыто
@@ -120,40 +222,46 @@ public class Controller {
                 return;
             case Character:
                 char c = key.getCharacter();
-                if (c == 'w' || c == 'W') movePlayer(0, -1);
-                if (c == 's' || c == 'S') movePlayer(0, 1);
-                if (c == 'a' || c == 'A') movePlayer(-1, 0);
-                if (c == 'd' || c == 'D') movePlayer(1, 0);
+                if (c == 'w' || c == 'W') world.tryToMove(player, GameMap.Direction.UP);
+                if (c == 's' || c == 'S') world.tryToMove(player, GameMap.Direction.DOWN);
+                if (c == 'a' || c == 'A') world.tryToMove(player, GameMap.Direction.LEFT);
+                if (c == 'd' || c == 'D') world.tryToMove(player, GameMap.Direction.RIGHT);
 
                 if (c == 'j' || c == 'J') {
-                    openMenu("food", foodItems);
+                    openMenu("food", player.getBackpack().getItems().stream().
+                            filter(e -> e.getType().equals(ItemTypes.Type.FOOD)).toList());
                 }
                 if (c == 'k' || c == 'K') {
-                    openMenu("elixir", elixirItems);
+                    openMenu("elixirs", player.getBackpack().getItems().stream().
+                            filter(e -> e.getType().equals(ItemTypes.Type.ELIXIR)).toList());
                 }
                 if (c == 'h' || c == 'H') {
-                    openMenu("weapon", weaponItems);
+                    openMenu("weapons", player.getBackpack().getItems().stream().
+                            filter(e -> e.getType().equals(ItemTypes.Type.WEAPON)).toList());
                 }
                 if (c == 'e' || c == 'E') {
-                    openMenu("scroll", scrollItems);
+                    openMenu("scroll", player.getBackpack().getItems().stream().
+                            filter(e -> e.getType().equals(ItemTypes.Type.SCROLLS)).toList());
                 }
                 break;
         }
         // Проверка на переход на следующий уровень
-        if (playerX == currentLevel.getExitPosition().x &&
-                playerY == currentLevel.getExitPosition().y) {
+        if (world.getPlayer().getPosX() == world.getLevel().getExitPosition().x &&
+                world.getPlayer().getPosY() == world.getLevel().getExitPosition().y) {
             ScreenManager.showMessage(screen, "You found the exit! Next level!");
             currentState = GameState.ENDGAME_SCREEN; // уточнить !!!
         }
 
         // Проверка на смерть (для теста)
-        if (playerX == playerY /*8 && playerY == 8*/) {
+        if (world.getPlayer().getPosX() == world.getPlayer().getPosY() /*8 && playerY == 8*/) {
             currentState = GameState.DEAD_SCREEN;
         }
     }
 
     // Обработка выбора предмета из рюкзака
-    private static void handleMenuInput(KeyStroke key, Screen screen) {
+    private void handleMenuInput(KeyStroke key, Screen screen) {
+        Character player = world.getPlayer();
+
         if (key.getKeyType() == KeyType.Escape) {
             closeMenu();
             return;
@@ -164,52 +272,54 @@ public class Controller {
             if (c >= '1' && c <= '9') {
                 int index = c - '1';
                 if (index < currentMenuItems.size()) {
-                    String selectedItem = currentMenuItems.get(index);
+                    String selectedItem = String.valueOf(currentMenuItems.get(index));
                     ScreenManager.showMessage(screen, "Used: " + selectedItem);
+                    player.getBackpack().useItem(currentMenuItems.get(index), player);
                     closeMenu();
                 }
             }
         }
     }
 
-    private static void openMenu(String type, List<String> items) {
+    private void openMenu(String type, List<Item> items) {
         currentMenuType = type;
         currentMenuItems = new ArrayList<>(items);
         showingMenu = true;
     }
 
-    private static void closeMenu() {
+    private void closeMenu() {
         showingMenu = false;
         currentMenuType = "";
         currentMenuItems.clear();
     }
 
     // Движение игрока
-    private static void movePlayer(int dx, int dy) {
-        int newX = playerX + dx;
-        int newY = playerY + dy;
+    private void movePlayer(int dx, int dy) {
+        Character player = world.getPlayer();
+        int newX = player.getPosX() + dx;
+        int newY = player.getPosY() + dy;
 
         if (canMove(newX, newY)) {
-            playerX = newX;
-            playerY = newY;
+            player.setPosX(newX);
+            player.setPosY(newY);
             calculateFOV(); // Пересчитываем видимость
             updateExplored(); // Обновляем исследованные клетки
         }
     }
 
-    private static boolean canMove(int x, int y) {
+    private boolean canMove(int x, int y) {
         if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
             return false;
         }
 
-        GameMap.TileType tile = currentLevel.getTile(x, y);
+        GameMap.TileType tile = world.getLevel().getTile(x, y);
         if (tile == GameMap.TileType.WALL) {
             return false;
         }
 
         if (tile == GameMap.TileType.DOOR) {
             Position pos = new Position(x, y);
-            var door = currentLevel.getDoors().get(pos);
+            var door = world.getLevel().getDoors().get(pos);
             if (door != null && door.locked) {
                 // Пока нет системы ключей — просто запрещаем проход
                 return false;
@@ -220,7 +330,7 @@ public class Controller {
     }
 
     // Обновляем исследованные клетки при движении
-    private static void updateExplored() {
+    private void updateExplored() {
         // Отмечаем все клетки, которые видны прямо сейчас, как исследованные
         for (int x = 0; x < WIDTH; x++) {
             for (int y = 0; y < HEIGHT; y++) {
@@ -233,26 +343,41 @@ public class Controller {
 
     // Метод проверки видимости
     // упрощённая версия — видим только квадрат вокруг игрока
-    static boolean isVisible(int x, int y) {
+    boolean isVisible(int x, int y) {
         // Проверяем, находится ли клетка в квадратном радиусе
-        int dx = Math.abs(x - playerX);
-        int dy = Math.abs(y - playerY);
+        int dx = Math.abs(x - world.getPlayer().getPosX());
+        int dy = Math.abs(y - world.getPlayer().getPosY());
         return dx <= VIEW_RADIUS && dy <= VIEW_RADIUS;
     }
 
     // Сброс исследованных клеток при новой игре
-    private static void resetGame() {
-        currentLevel = new DungeonLevel(); // Генерируем новый уровень
-        Position startPos = currentLevel.getStartPosition();
-        playerX = startPos.x;
-        playerY = startPos.y;
+    private void resetGame() {
+        Character player = world.getPlayer();
+        world.setLevel(new DungeonLevel());// Генерируем новый уровень
+        world.getItems().clear();
+        world.getEnemies().clear();
+        Position start = world.getLevel().getStartPosition();
+        player.setPosX(start.x);
+        player.setPosY(start.y);
+        player.getKeys().clear();
+        world.setLevelNumber(world.getLevelNumber() + 1);
+        LevelGenerator lg = new LevelGenerator(world.getLevel());
+        world.setEnemies(lg.generateLevelEnemies(
+                world.getLevelNumber(), world.getStruggleCounter()
+        ));
+        world.setItems(lg.generateLevelItems(
+                world.getLevelNumber(), world.getStruggleCounter()
+        ));
+        turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());
+        world.scaleEnemiesStrength(world.getLevelNumber(), world.getEnemies());
+
         // Сброс массива исследованных клеток
         for (int x = 0; x < WIDTH; x++) {
             for (int y = 0; y < HEIGHT; y++) {
                 explored[x][y] = false;
             }
         }
-        explored[playerX][playerY] = true; // Стартовая позиция считается исследованной
+        explored[player.getPosX()][player.getPosY()] = true; // Стартовая позиция считается исследованной
         calculateFOV(); // Пересчитываем FOV сразу после старта
         showingMenu = false;
         currentMenuType = "";
@@ -266,8 +391,9 @@ public class Controller {
     private static final int MAX_FOV_DISTANCE = 15;
 
     // Рассчитываем FOV с помощью Bresenham
-    public static void calculateFOV() {
-        if (currentLevel == null) return;
+    public void calculateFOV() {
+        Character player = world.getPlayer();
+        if (world.getLevel() == null) return;
         // Сбрасываем текущую видимость
         for (int x = 0; x < WIDTH; x++) {
             for (int y = 0; y < HEIGHT; y++) {
@@ -280,8 +406,8 @@ public class Controller {
             for (int dy = -MAX_FOV_DISTANCE; dy <= MAX_FOV_DISTANCE; dy++) {
                 if (dx == 0 && dy == 0) continue; // не считаем саму позицию игрока
 
-                int targetX = playerX + dx;
-                int targetY = playerY + dy;
+                int targetX = player.getPosX() + dx;
+                int targetY = player.getPosY() + dy;
 
                 // Проверяем, в пределах ли карты
                 if (targetX < 0 || targetX >= WIDTH || targetY < 0 || targetY >= HEIGHT) {
@@ -289,13 +415,13 @@ public class Controller {
                 }
 
                 // Запускаем алгоритм Брезенхэма от игрока до этой клетки
-                castRay(playerX, playerY, targetX, targetY);
+                castRay(player.getPosX(), player.getPosY(), targetX, targetY);
             }
         }
     }
 
     // Алгоритм Брезенхэма — прорисовывает линию от (x0,y0) до (x1,y1), останавливаясь на стене
-    private static void castRay(int x0, int y0, int x1, int y1) {
+    private void castRay(int x0, int y0, int x1, int y1) {
         int dx = Math.abs(x1 - x0);
         int dy = Math.abs(y1 - y0);
         int sx = x0 < x1 ? 1 : -1;
@@ -310,7 +436,7 @@ public class Controller {
             currentFOV[x0][y0] = true;
 
             // Если встретили стену — прекращаем луч
-            if (currentLevel.getTile(x0, y0) == TileType.WALL) {
+            if (world.getLevel().getTile(x0, y0) == TileType.WALL) {
                 break;
             }
 
@@ -336,16 +462,12 @@ public class Controller {
     }
 
     // Геттеры
-    public static GameState getCurrentState() {
+    public GameState getCurrentState() {
         return currentState;
     }
 
-    public static int getPlayerX() {
-        return playerX;
-    }
-
-    public static int getPlayerY() {
-        return playerY;
+    public void setGameState(GameState state) {
+        currentState = state;
     }
 
     public static boolean isShowingMenu() {
@@ -356,16 +478,12 @@ public class Controller {
         return currentMenuType;
     }
 
-    public static List<String> getCurrentMenuItems() {
+    public List<Item> getCurrentMenuItems() {
         return currentMenuItems;
     }
 
-    public static int getCurrentMenuLine() {
+    public int getCurrentMenuLine() {
         return currentMenuLine;
-    }
-
-    public static DungeonLevel getCurrentLevel() {
-        return currentLevel;
     }
 
     public static boolean isExplored(int x, int y) {

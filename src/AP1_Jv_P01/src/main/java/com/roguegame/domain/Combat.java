@@ -64,7 +64,6 @@ public class Combat {
         if (monster.getType() != Enemy.Type.SNAKE_MAGE) return damage;
         if (Math.random() < Enemy.Type.SLEEP_CHANCE) {
             monster.setPlayerAsleep(true);
-            System.out.println("PLAYA SLEEPY PEEPY");
         }
         return calculateZombieGhostDamage(monster);
     }
@@ -96,7 +95,6 @@ public class Combat {
             if (checkIfHit(player, monster, currentTurn.getCurrentTurn())) {
                 int damage = calculatePlayerDamage(player, monster);
                 monster.setHealth(monster.getHealth() - damage);
-                System.out.println("Player dealt: " + damage + " to: " + monster);
             }
             if (monster.getHealth() <= 0) {
                 player.setGold(monster.getType().getValue() + player.getGold());
@@ -130,7 +128,6 @@ public class Combat {
             if (player.getHealth() <= 0) {
                 player.setAlive(false);
             }
-            System.out.println("Enemy dealt: " + damage + " to: " + player);
         }
     }
 }

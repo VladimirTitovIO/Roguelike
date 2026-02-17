@@ -13,7 +13,6 @@ public class MapTest {
         LevelGenerator lg = new LevelGenerator(level);
         World w = new World(player, level, level.getKeysOnGround());
         List<Enemy> enemies = lg.generateLevelEnemies(w.getLevelNumber(), w.getStruggleCounter());
-        enemies.add(new Enemy(Enemy.Type.SNAKE_MAGE, start.x + 2, start.y +1));
         List<Item> items = lg.generateLevelItems(w.getLevelNumber(), w.getStruggleCounter());
         w.setItems(items);
         w.setEnemies(enemies);
@@ -21,51 +20,51 @@ public class MapTest {
         player.setPosX(start.x);
 
         //---------------------SIMPLE GAME LOOP-----------------------------------------------------------------------------------------------------------------------
-        player.getBackpack().addItem(new Item(ItemTypes.Subtype.AXE, 0, 0));
-        List<Entity> turnOrder = w.calculateTurn(player, enemies);
-        while (w.getLevelNumber() < 20 && player.isAlive()) {
-            printMap(level, player, w, enemies, exit);
-            Scanner scanner = new Scanner(System.in);
-            for (Entity e : turnOrder) {
-                if (!e.isAlive() && e instanceof Enemy) {
-                    enemies.remove(e);
-                    continue;
-                }
-                if (e instanceof Character && !e.isPlayerAsleep()) {
-                    System.out.println("Player's input: ");
-                    String input = scanner.nextLine();
-                    w.handlePlayerTurn(w, input, scanner, player);
-                } else {
-                    Enemy enemy = (Enemy) e;
-                    if (enemy.getType() == Enemy.Type.GHOST && enemy.isVisible()) enemy.setVisible(false);
-                    else enemy.setVisible(true);
-                    if (enemy.isPlayerNear(player, enemy)) {
-                        enemy.tryToFollowPlayer(player, enemy, w);
-                    } else {
-                        enemy.movementPattern(enemy, w);
-                    }
-                }
-            }
-            if (player.getPosX() == exit.x && player.getPosY() == exit.y) {
-                level = new DungeonLevel();
-                w.setLevel(level);
-                items.clear();
-                enemies.clear();
-                start = level.getStartPosition();
-                exit = level.getExitPosition();
-                player.setPosY(start.y);
-                player.setPosX(start.x);
-                player.getKeys().clear();
-                w.setLevelNumber(w.getLevelNumber() + 1);
-                lg = new LevelGenerator(level);
-                items = lg.generateLevelItems(w.getLevelNumber(), w.getStruggleCounter());
-                w.setItems(items);
-                enemies = lg.generateLevelEnemies(w.getLevelNumber(), w.getStruggleCounter());
-                w.setEnemies(enemies);
-                turnOrder = w.calculateTurn(player, enemies);
-                w.scaleEnemiesStrength(w.getLevelNumber(), enemies);
-            }
-        }
+//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.AXE, 0, 0));
+//        List<Entity> turnOrder = w.calculateTurn(player, enemies);
+//        while (w.getLevelNumber() < 20 && player.isAlive()) {
+//            printMap(level, player, w, enemies, exit);
+//            Scanner scanner = new Scanner(System.in);
+//            for (Entity e : turnOrder) {
+//                if (!e.isAlive() && e instanceof Enemy) {
+//                    enemies.remove(e);
+//                    continue;
+//                }
+//                if (e instanceof Character && !e.isPlayerAsleep()) {
+//                    System.out.println("Player's input: ");
+//                    String input = scanner.nextLine();
+//                    w.handlePlayerTurn(w, input, scanner, player);
+//                } else {
+//                    Enemy enemy = (Enemy) e;
+//                    if (enemy.getType() == Enemy.Type.GHOST && enemy.isVisible()) enemy.setVisible(false);
+//                    else enemy.setVisible(true);
+//                    if (enemy.isPlayerNear(player, enemy)) {
+//                        enemy.tryToFollowPlayer(player, enemy, w);
+//                    } else {
+//                        enemy.movementPattern(enemy, w);
+//                    }
+//                }
+//            }
+//            if (player.getPosX() == exit.x && player.getPosY() == exit.y) {
+//                level = new DungeonLevel();
+//                w.setLevel(level);
+//                items.clear();
+//                enemies.clear();
+//                start = level.getStartPosition();
+//                exit = level.getExitPosition();
+//                player.setPosY(start.y);
+//                player.setPosX(start.x);
+//                player.getKeys().clear();
+//                w.setLevelNumber(w.getLevelNumber() + 1);
+//                lg = new LevelGenerator(level);
+//                items = lg.generateLevelItems(w.getLevelNumber(), w.getStruggleCounter());
+//                w.setItems(items);
+//                enemies = lg.generateLevelEnemies(w.getLevelNumber(), w.getStruggleCounter());
+//                w.setEnemies(enemies);
+//                turnOrder = w.calculateTurn(player, enemies);
+//                w.scaleEnemiesStrength(w.getLevelNumber(), enemies);
+//            }
+//        }
         //---------------------SIMPLE GAME LOOP-----------------------------------------------------------------------------------------------------------------------
         System.out.println();
     }

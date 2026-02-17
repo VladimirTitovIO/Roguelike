@@ -1,0 +1,320 @@
+Index: src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/GameRenderer.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/GameRenderer.java b/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/GameRenderer.java
+new file mode 100644
+--- /dev/null	(date 1771355013561)
++++ b/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/GameRenderer.java	(date 1771355013561)
+@@ -0,0 +1,153 @@
++package com.roguegame.presentation;
++
++import com.googlecode.lanterna.TextColor;
++import com.googlecode.lanterna.graphics.TextGraphics;
++import com.roguegame.domain.DungeonLevel;
++import com.roguegame.domain.DungeonLevel.DoorColor;
++import com.roguegame.domain.DungeonLevel.Position;
++import com.roguegame.domain.GameMap.TileType;
++
++/**
++ * Отвечает за отрисовку игрового уровня
++ */
++public class GameRenderer {
++
++    public static final int LEVEL_WIDTH = DungeonLevel.WIDTH;
++    public static final int LEVEL_HEIGHT = DungeonLevel.HEIGHT;
++
++    /**
++     * Отрисовывает игровую карту с учётом видимости и освещённости.
++     */
++    public static void renderMap(TextGraphics g, DungeonLevel level) {
++        for (int y = 0; y < LEVEL_HEIGHT; y++) {
++            for (int x = 0; x < LEVEL_WIDTH; x++) {
++                TileType tile = level.getTile(x, y);
++                boolean isSeen = Controller.isExplored(x, y);
++                boolean isVisibleNow = Controller.isCurrentlyVisible(x, y);
++
++                renderTile(g, tile, x, y, isSeen, isVisibleNow, level);
++            }
++        }
++        renderKeys(g, level);
++    }
++
++    private static void renderTile(TextGraphics g, TileType tile, int x, int y,
++                                   boolean isSeen, boolean isVisibleNow, DungeonLevel level) {
++        if (isVisibleNow) {
++            drawVisibleTile(g, tile, x, y, level);
++        } else if (isSeen) {
++            drawExploredTile(g, tile, x, y);
++        } else {
++            drawUnexploredTile(g, x, y);
++        }
++    }
++
++    private static void drawVisibleTile(TextGraphics g, TileType tile, int x, int y, DungeonLevel level) {
++        switch (tile) {
++            case WALL:
++                g.setForegroundColor(TextColor.ANSI.WHITE);
++                g.setCharacter(x, y, '#');
++                break;
++            case FLOOR:
++                g.setForegroundColor(TextColor.ANSI.GREEN);
++                g.setCharacter(x, y, '.');
++                break;
++            case CORRIDOR:
++                g.setForegroundColor(TextColor.ANSI.YELLOW);
++                g.setCharacter(x, y, '.');
++                break;
++            case DOOR:
++                renderDoor(g, x, y, level);
++                break;
++            default:
++                g.setForegroundColor(TextColor.ANSI.WHITE);
++                g.setCharacter(x, y, '?');
++        }
++    }
++
++    private static void renderDoor(TextGraphics g, int x, int y, DungeonLevel level) {
++        Position pos = new Position(x, y);
++        var door = level.getDoors().get(pos);
++        if (door != null && door.locked) {
++            g.setForegroundColor(getDoorColor(door.color));
++            g.setCharacter(x, y, 'D');
++        } else {
++            g.setForegroundColor(TextColor.ANSI.CYAN);
++            g.setCharacter(x, y, '+');
++        }
++    }
++
++    private static void drawExploredTile(TextGraphics g, TileType tile, int x, int y) {
++        if (tile == TileType.WALL) {
++            g.setForegroundColor(TextColor.ANSI.WHITE);
++            g.setCharacter(x, y, '#');
++        } else {
++            g.setForegroundColor(TextColor.ANSI.BLACK);
++            g.setCharacter(x, y, ' ');
++        }
++    }
++
++    private static void drawUnexploredTile(TextGraphics g, int x, int y) {
++        g.setForegroundColor(TextColor.ANSI.BLACK);
++        g.setCharacter(x, y, ' ');
++    }
++
++    private static void renderKeys(TextGraphics g, DungeonLevel level) {
++        level.getKeysOnGround().forEach((pos, color) -> {
++            if (Controller.isCurrentlyVisible(pos.x, pos.y)) {
++                g.setForegroundColor(getKeyColor(color));
++                g.setCharacter(pos.x, pos.y, 'K');
++            }
++        });
++    }
++
++    /**
++     * Отрисовывает игрока на карте.
++     */
++    public static void renderPlayer(TextGraphics g, int playerX, int playerY) {
++        g.setForegroundColor(TextColor.ANSI.WHITE);
++        g.setCharacter(playerX, playerY, '@');
++    }
++
++    /**
++     * Отрисовывает панель статистики справа от карты.
++     */
++    public static void renderUIPanel(TextGraphics g) {
++        int x = LEVEL_WIDTH + 2;
++        int y = 1;
++
++        g.putString(x, y++, "LVL: 1");
++        g.putString(x, y++, "Gold: 88");
++        g.putString(x, y++, "Health: 188.00/500");
++        g.putString(x, y++, "Agility: 70");
++        g.putString(x, y++, "Strength: 70");
++        y++;
++
++        g.setForegroundColor(TextColor.ANSI.YELLOW);
++        g.putString(x, y++, "Backpack:");
++        g.setForegroundColor(TextColor.ANSI.WHITE);
++        g.putString(x, y++, "Food: 3");
++        g.putString(x, y++, "Elixirs: 3");
++        g.putString(x, y++, "Weapons: 3");
++        g.putString(x, y, "Scrolls: 3");
++    }
++
++    // --- Вспомогательные методы ---
++
++    private static TextColor getDoorColor(DoorColor color) {
++        return switch (color) {
++            case RED -> TextColor.ANSI.RED;
++            case BLUE -> TextColor.ANSI.BLUE;
++            case YELLOW -> TextColor.ANSI.YELLOW;
++        };
++    }
++
++    private static TextColor getKeyColor(DoorColor color) {
++        return switch (color) {
++            case RED -> TextColor.ANSI.RED_BRIGHT;
++            case BLUE -> TextColor.ANSI.BLUE_BRIGHT;
++            case YELLOW -> TextColor.ANSI.YELLOW_BRIGHT;
++        };
++    }
++}
++
+Index: src/AP1_Jv_P01/src/main/java/com/roguegame/datalayer/SaveGameService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package datalayer;\r\n\r\nimport domain.*;\r\n\r\nimport java.nio.file.Path;\r\nimport java.util.Optional;\r\n\r\npublic class SaveGameService {\r\n\r\n    private final SaveRepository repository;\r\n\r\n    public SaveGameService() {\r\n        this.repository = new SaveRepository(Path.of(\"savegame.json\"));\r\n    }\r\n\r\n    // SAVE\r\n    public void saveGame(Character player,\r\n                         DungeonLevel level,\r\n                         DungeonLevel.Position playerPos,\r\n                         int levelNumber,\r\n                         int score) throws Exception {\r\n\r\n        SaveModels.Session session =\r\n                SaveMapper.toSession(player, level, playerPos, levelNumber, score);\r\n\r\n        repository.saveSession(session);\r\n    }\r\n\r\n    //  LOAD\r\n    public Optional<LoadedGame> loadGame() {\r\n\r\n        Optional<SaveModels.Session> opt = repository.loadLastSession();\r\n        if (opt.isEmpty()) return Optional.empty();\r\n\r\n        SaveModels.Session s = opt.get();\r\n\r\n        Character player = SaveMapper.toCharacter(s.player);\r\n        DungeonLevel level = SaveMapper.toDungeonLevel(s.dungeon);\r\n        DungeonLevel.Position pos =\r\n                new DungeonLevel.Position(s.playerPos.x, s.playerPos.y);\r\n\r\n        return Optional.of(new LoadedGame(\r\n                player,\r\n                level,\r\n                pos,\r\n                s.levelNumber,\r\n                s.score\r\n        ));\r\n    }\r\n\r\n    //  END GAME\r\n    public void finishGame(int score, int levelNumber, boolean win) throws Exception {\r\n        SaveModels.Attempt a = new SaveModels.Attempt();\r\n        a.finishedAt = System.currentTimeMillis();\r\n        a.score = score;\r\n        a.levelReached = levelNumber;\r\n        a.success = win;\r\n\r\n        repository.addAttempt(a);\r\n        repository.clearSession();\r\n    }\r\n\r\n    // DTO для возврата\r\n    public record LoadedGame(\r\n            Character player,\r\n            DungeonLevel level,\r\n            DungeonLevel.Position playerPos,\r\n            int levelNumber,\r\n            int score\r\n    ) {}\r\n}\r\n/*\r\nin main:\r\nSaveGameService saveService = new SaveGameService();\r\n\r\nпри старте:\r\nOptional<SaveGameService.LoadedGame> loaded = saveService.loadGame();\r\n\r\nCharacter player;\r\nDungeonLevel level;\r\nDungeonLevel.Position playerPos;\r\nint levelNumber;\r\nint score;\r\n\r\nif (loaded.isPresent()) {\r\nvar g = loaded.get();\r\nplayer = g.player();\r\nlevel = g.level();\r\nplayerPos = g.playerPos();\r\nlevelNumber = g.levelNumber();\r\nscore = g.score();\r\n\r\n    System.out.println(\"Continue game loaded!\");\r\n} else {\r\nplayer = new Character(10,10,3,3,0);\r\nlevel = new DungeonLevel();\r\nplayerPos = level.getStartPosition();\r\nlevelNumber = 1;\r\nscore = 0;\r\n        }\r\n\r\nпосле прохождения уровня:\r\nsaveService.saveGame(player, level, playerPos, levelNumber, score);\r\n\r\nпри окончании игры:\r\nsaveService.finishGame(score, levelNumber, win);*/\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/AP1_Jv_P01/src/main/java/com/roguegame/datalayer/SaveGameService.java b/src/AP1_Jv_P01/src/main/java/com/roguegame/datalayer/SaveGameService.java
+--- a/src/AP1_Jv_P01/src/main/java/com/roguegame/datalayer/SaveGameService.java	(revision 4a306409ee4b639db724e0dbaa2e259751eb6fda)
++++ b/src/AP1_Jv_P01/src/main/java/com/roguegame/datalayer/SaveGameService.java	(date 1771319674786)
+@@ -1,74 +1,75 @@
+-package datalayer;
+-
+-import domain.*;
+-
+-import java.nio.file.Path;
+-import java.util.Optional;
+-
+-public class SaveGameService {
+-
+-    private final SaveRepository repository;
+-
+-    public SaveGameService() {
+-        this.repository = new SaveRepository(Path.of("savegame.json"));
+-    }
+-
+-    // SAVE
+-    public void saveGame(Character player,
+-                         DungeonLevel level,
+-                         DungeonLevel.Position playerPos,
+-                         int levelNumber,
+-                         int score) throws Exception {
+-
+-        SaveModels.Session session =
+-                SaveMapper.toSession(player, level, playerPos, levelNumber, score);
+-
+-        repository.saveSession(session);
+-    }
+-
+-    //  LOAD
+-    public Optional<LoadedGame> loadGame() {
+-
+-        Optional<SaveModels.Session> opt = repository.loadLastSession();
+-        if (opt.isEmpty()) return Optional.empty();
+-
+-        SaveModels.Session s = opt.get();
+-
+-        Character player = SaveMapper.toCharacter(s.player);
+-        DungeonLevel level = SaveMapper.toDungeonLevel(s.dungeon);
+-        DungeonLevel.Position pos =
+-                new DungeonLevel.Position(s.playerPos.x, s.playerPos.y);
+-
+-        return Optional.of(new LoadedGame(
+-                player,
+-                level,
+-                pos,
+-                s.levelNumber,
+-                s.score
+-        ));
+-    }
+-
+-    //  END GAME
+-    public void finishGame(int score, int levelNumber, boolean win) throws Exception {
+-        SaveModels.Attempt a = new SaveModels.Attempt();
+-        a.finishedAt = System.currentTimeMillis();
+-        a.score = score;
+-        a.levelReached = levelNumber;
+-        a.success = win;
+-
+-        repository.addAttempt(a);
+-        repository.clearSession();
+-    }
+-
+-    // DTO для возврата
+-    public record LoadedGame(
+-            Character player,
+-            DungeonLevel level,
+-            DungeonLevel.Position playerPos,
+-            int levelNumber,
+-            int score
+-    ) {}
+-}
++//package com.roguegame.datalayer;
++//
++//import com.roguegame.domain.*;
++//import com.roguegame.domain.Character;
++//
++//import java.nio.file.Path;
++//import java.util.Optional;
++//
++//public class SaveGameService {
++//
++//    private final SaveRepository repository;
++//
++//    public SaveGameService() {
++//        this.repository = new SaveRepository(Path.of("savegame.json"));
++//    }
++//
++//    // SAVE
++//    public void saveGame(Character player,
++//                         DungeonLevel level,
++//                         DungeonLevel.Position playerPos,
++//                         int levelNumber,
++//                         int score) throws Exception {
++//
++//        SaveModels.Session session =
++//                SaveMapper.toSession(player, level, playerPos, levelNumber, score);
++//
++//        repository.saveSession(session);
++//    }
++//
++//    //  LOAD
++//    public Optional<LoadedGame> loadGame() {
++//
++//        Optional<SaveModels.Session> opt = repository.loadLastSession();
++//        if (opt.isEmpty()) return Optional.empty();
++//
++//        SaveModels.Session s = opt.get();
++//
++//        Character player = SaveMapper.toCharacter(s.player);
++//        DungeonLevel level = SaveMapper.toDungeonLevel(s.dungeon);
++//        DungeonLevel.Position pos =
++//                new DungeonLevel.Position(s.playerPos.x, s.playerPos.y);
++//
++//        return Optional.of(new LoadedGame(
++//                player,
++//                level,
++//                pos,
++//                s.levelNumber,
++//                s.score
++//        ));
++//    }
++//
++//    //  END GAME
++//    public void finishGame(int score, int levelNumber, boolean win) throws Exception {
++//        SaveModels.Attempt a = new SaveModels.Attempt();
++//        a.finishedAt = System.currentTimeMillis();
++//        a.score = score;
++//        a.levelReached = levelNumber;
++//        a.success = win;
++//
++//        repository.addAttempt(a);
++//        repository.clearSession();
++//    }
++//
++//    // DTO для возврата
++//    public record LoadedGame(
++//            Character player,
++//            DungeonLevel level,
++//            DungeonLevel.Position playerPos,
++//            int levelNumber,
++//            int score
++//    ) {}
++//}
+ /*
+ in main:
+ SaveGameService saveService = new SaveGameService();

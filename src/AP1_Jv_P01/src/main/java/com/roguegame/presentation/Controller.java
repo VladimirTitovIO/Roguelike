@@ -22,21 +22,21 @@ public class Controller {
         world = new World();
         Character player = world.getPlayer();
         turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_MAX_HEALTH, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_AGILITY, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_STRENGTH, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_MEDIUM, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_BIG, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_SMALL, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_AGILITY, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_STRENGTH, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_MAX_HEALTH, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.AXE, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SWORD, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MACE, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_BIG, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_MEDIUM, 0, 0));
-//        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_SMALL, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_MAX_HEALTH, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_AGILITY, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SCROLLS_STRENGTH, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_MEDIUM, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_BIG, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_SMALL, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_AGILITY, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_STRENGTH, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.ELIXIR_MAX_HEALTH, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.AXE, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.SWORD, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MACE, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_BIG, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_MEDIUM, 0, 0));
+        player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_SMALL, 0, 0));
 
     }
 
@@ -97,14 +97,6 @@ public class Controller {
     }
 
     public enum GameState {
-        MOVEMENT,
-        COMBAT,
-        INVENTORY_WEAPON_SELECT,
-        INVENTORY_FOOD_SELECT,
-        INVENTORY_ELIXIR_SELECT,
-        INVENTORY_MEDKIT_SELECT,
-        INVENTORY_SCROLL_SELECT,
-        INVENTORY_TREASURE_SELECT,
         START_SCREEN,
         MENU_SCREEN,
         GAME_SCREEN,
@@ -203,6 +195,7 @@ public class Controller {
     // Обработка нажатия клавиш в игре
     private void handleGameInput(KeyStroke key, Screen screen) {
         Character player = world.getPlayer();
+        boolean moved = false;
         if (showingMenu) { // меню выбора предметов из рюкзака
             handleMenuInput(key, screen);
             return; // Не обрабатываем движение, пока меню открыто
@@ -213,25 +206,14 @@ public class Controller {
                 return;
             case Character:
                 char c = key.getCharacter();
-                if (c == 'w' || c == 'W') {
-                    world.tryToMove(player, GameMap.Direction.UP);
+                if (c == 'w' || c == 'W') moved = world.tryToMove(player, GameMap.Direction.UP);
+                if (c == 's' || c == 'S') moved = world.tryToMove(player, GameMap.Direction.DOWN);
+                if (c == 'a' || c == 'A') moved = world.tryToMove(player, GameMap.Direction.LEFT);
+                if (c == 'd' || c == 'D') moved = world.tryToMove(player, GameMap.Direction.RIGHT);
+                if (moved) {
                     calculateFOV();
                     updateExplored();
-                }
-                if (c == 's' || c == 'S') {
-                    world.tryToMove(player, GameMap.Direction.DOWN);
-                    calculateFOV();
-                    updateExplored();
-                }
-                if (c == 'a' || c == 'A'){
-                    world.tryToMove(player, GameMap.Direction.LEFT);
-                    calculateFOV();
-                    updateExplored();
-                }
-                if (c == 'd' || c == 'D') {
-                    world.tryToMove(player, GameMap.Direction.RIGHT);
-                    calculateFOV();
-                    updateExplored();
+                    setMovesMade(getMovesMade() + 1);
                 }
 
                 if (c == 'j' || c == 'J') {
@@ -261,10 +243,10 @@ public class Controller {
             resetGame();
         }
 
-        // Проверка на смерть (для теста)
-        if (world.getPlayer().getPosX() == world.getPlayer().getPosY() /*8 && playerY == 8*/) {
-            currentState = GameState.DEAD_SCREEN;
-        }
+//        // Проверка на смерть (для теста)
+//        if (world.getPlayer().getPosX() == world.getPlayer().getPosY() /*8 && playerY == 8*/) {
+//            currentState = GameState.DEAD_SCREEN;
+//        }
     }
 
     // Обработка выбора предмета из рюкзака
@@ -284,6 +266,9 @@ public class Controller {
                     String selectedItem = String.valueOf(currentMenuItems.get(index));
                     ScreenManager.showMessage(screen, "Used: " + selectedItem);
                     player.getBackpack().useItem(currentMenuItems.get(index), player);
+                    if (currentMenuItems.get(index).getType() == ItemTypes.Type.FOOD) setFoodUsed(getFoodUsed() + 1);
+                    if (currentMenuItems.get(index).getType() == ItemTypes.Type.ELIXIR) setElixirsUsed(getElixirsUsed() + 1);
+                    if (currentMenuItems.get(index).getType() == ItemTypes.Type.SCROLLS) setScrollsUsed(getScrollsUsed() + 1);
                     closeMenu();
                 }
             }

@@ -2,10 +2,12 @@ package com.roguegame.presentation;
 
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
+import com.roguegame.domain.Character;
 import com.roguegame.domain.DungeonLevel;
 import com.roguegame.domain.DungeonLevel.DoorColor;
 import com.roguegame.domain.DungeonLevel.Position;
 import com.roguegame.domain.GameMap.TileType;
+import com.roguegame.domain.ItemTypes;
 
 /**
  * Отвечает за отрисовку игрового уровня
@@ -113,24 +115,27 @@ public class GameRenderer {
     /**
      * Отрисовывает панель статистики справа от карты.
      */
-    public static void renderUIPanel(TextGraphics g) {
+    public static void renderUIPanel(TextGraphics g, Controller controller) {
         int x = LEVEL_WIDTH + 2;
         int y = 1;
 
-        g.putString(x, y++, "LVL: 1");
-        g.putString(x, y++, "Gold: 88");
-        g.putString(x, y++, "Health: 188.00/500");
-        g.putString(x, y++, "Agility: 70");
-        g.putString(x, y++, "Strength: 70");
+        Character player = controller.getPlayer();
+
+        g.putString(x, y++, "LVL: " + controller.getLevel());
+        g.putString(x, y++, "Gold: " + player.getGold());
+        g.putString(x, y++, "Health: " + player.getHealth() + "/" + player.getMaximumHealth());
+        g.putString(x, y++, "Agility: " + player.getAgility());
+        g.putString(x, y++, "Strength: " + player.getStrength() + "(" + player.getWeapon().getSubtype() + " " + player.getWeaponStrength() +")");
         y++;
 
         g.setForegroundColor(TextColor.ANSI.YELLOW);
         g.putString(x, y++, "Backpack:");
         g.setForegroundColor(TextColor.ANSI.WHITE);
-        g.putString(x, y++, "Food: 3");
-        g.putString(x, y++, "Elixirs: 3");
-        g.putString(x, y++, "Weapons: 3");
-        g.putString(x, y, "Scrolls: 3");
+        g.putString(x, y++, "Food: " + player.getBackpack().getCount(ItemTypes.Type.FOOD));
+        g.putString(x, y++, "Elixirs: " + player.getBackpack().getCount(ItemTypes.Type.ELIXIR));
+        g.putString(x, y++, "Weapons: " + player.getBackpack().getCount(ItemTypes.Type.WEAPON));
+        g.putString(x, y, "Scrolls: " + player.getBackpack().getCount(ItemTypes.Type.SCROLLS));
+        g.putString(x, y, "Medkits: " + player.getBackpack().getCount(ItemTypes.Type.MEDKIT));
     }
 
     // --- Вспомогательные методы ---

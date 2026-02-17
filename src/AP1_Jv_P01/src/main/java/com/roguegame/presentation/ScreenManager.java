@@ -106,7 +106,7 @@ public class ScreenManager {
 
         GameRenderer.renderMap(graphics, controller);
         GameRenderer.renderPlayer(graphics, player.getPosX(), player.getPosY());
-        GameRenderer.renderUIPanel(graphics);
+        GameRenderer.renderUIPanel(graphics, controller);
 
         if (showingMenu) {
             drawMenu(screen, graphics, currentMenuType, currentMenuItems);

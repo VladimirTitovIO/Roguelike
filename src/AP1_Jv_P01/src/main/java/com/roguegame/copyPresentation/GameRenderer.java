@@ -2,7 +2,8 @@ package com.roguegame.copyPresentation;
 
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
-import com.roguegame.domain.DungeonLevel;
+import com.roguegame.domain.*;
+import com.roguegame.domain.Character;
 import com.roguegame.domain.DungeonLevel.DoorColor;
 import com.roguegame.domain.DungeonLevel.Position;
 import com.roguegame.domain.GameMap.TileType;
@@ -18,23 +19,23 @@ public class GameRenderer {
     /**
      * Отрисовывает игровую карту с учётом видимости и освещённости.
      */
-    public static void renderMap(TextGraphics g, DungeonLevel level) {
+    public static void renderMap(TextGraphics g, Controller controller) {
         for (int y = 0; y < LEVEL_HEIGHT; y++) {
             for (int x = 0; x < LEVEL_WIDTH; x++) {
-                TileType tile = level.getTile(x, y);
-                boolean isSeen = Controller.isExplored(x, y);
-                boolean isVisibleNow = Controller.isCurrentlyVisible(x, y);
+                TileType tile = controller.getLevel().getTile(x, y);
+                boolean isSeen = controller.isExplored(x, y);
+                boolean isVisibleNow = controller.isCurrentlyVisible(x, y);
 
-                renderTile(g, tile, x, y, isSeen, isVisibleNow, level);
+                renderTile(g, tile, x, y, isSeen, isVisibleNow, controller);
             }
         }
-        renderKeys(g, level);
+        renderKeys(g, controller);
     }
 
     private static void renderTile(TextGraphics g, TileType tile, int x, int y,
-                                   boolean isSeen, boolean isVisibleNow, DungeonLevel level) {
+                                   boolean isSeen, boolean isVisibleNow, Controller controller) {
         if (isVisibleNow) {
-            drawVisibleTile(g, tile, x, y, level);
+            drawVisibleTile(g, tile, x, y, controller);
         } else if (isSeen) {
             drawExploredTile(g, tile, x, y);
         } else {
@@ -42,7 +43,27 @@ public class GameRenderer {
         }
     }
 
-    private static void drawVisibleTile(TextGraphics g, TileType tile, int x, int y, DungeonLevel level) {
+    private static void drawVisibleTile(TextGraphics g, TileType tile, int x, int y, Controller controller) {
+        Position exit = controller.getLevel().getExitPosition();
+        if (exit.x == x && exit.y == y) {
+            g.setForegroundColor(TextColor.ANSI.CYAN);
+            g.setCharacter(x, y, 'E');
+            return;
+        }
+        for (Enemy e : controller.getWorld().getEnemies()) {
+            if (e.getPosX() == x && e.getPosY() == y) {
+                g.setForegroundColor(TextColor.ANSI.RED);
+                g.setCharacter(x, y, 'O');
+                return;
+            }
+        }
+        for (Item i : controller.getWorld().getItems()) {
+            if (i.getPosX() == x && i.getPosY() == y) {
+                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setCharacter(x, y, 'I');
+                return;
+            }
+        }
         switch (tile) {
             case WALL:
                 g.setForegroundColor(TextColor.ANSI.WHITE);
@@ -57,7 +78,7 @@ public class GameRenderer {
                 g.setCharacter(x, y, '.');
                 break;
             case DOOR:
-                renderDoor(g, x, y, level);
+                renderDoor(g, x, y, controller.getLevel());
                 break;
             default:
                 g.setForegroundColor(TextColor.ANSI.WHITE);
@@ -92,9 +113,9 @@ public class GameRenderer {
         g.setCharacter(x, y, ' ');
     }
 
-    private static void renderKeys(TextGraphics g, DungeonLevel level) {
-        level.getKeysOnGround().forEach((pos, color) -> {
-            if (Controller.isCurrentlyVisible(pos.x, pos.y)) {
+    private static void renderKeys(TextGraphics g, Controller controller) {
+        controller.getLevel().getKeysOnGround().forEach((pos, color) -> {
+            if (controller.isCurrentlyVisible(pos.x, pos.y)) {
                 g.setForegroundColor(getKeyColor(color));
                 g.setCharacter(pos.x, pos.y, 'K');
             }
@@ -112,24 +133,27 @@ public class GameRenderer {
     /**
      * Отрисовывает панель статистики справа от карты.
      */
-    public static void renderUIPanel(TextGraphics g) {
+    public static void renderUIPanel(TextGraphics g, Controller controller) {
         int x = LEVEL_WIDTH + 2;
         int y = 1;
 
-        g.putString(x, y++, "LVL: 1");
-        g.putString(x, y++, "Gold: 88");
-        g.putString(x, y++, "Health: 188.00/500");
-        g.putString(x, y++, "Agility: 70");
-        g.putString(x, y++, "Strength: 70");
+        Character player = controller.getPlayer();
+
+        g.putString(x, y++, "LVL: " + controller.getWorld().getLevelNumber());
+        g.putString(x, y++, "Gold: " + player.getGold());
+        g.putString(x, y++, "Health: " + player.getHealth() + "/" + player.getMaximumHealth());
+        g.putString(x, y++, "Agility: " + player.getAgility());
+        g.putString(x, y++, "Strength: " + player.getStrength() + "(" + player.getWeapon().getSubtype() + " " + player.getWeaponStrength() +")");
         y++;
 
         g.setForegroundColor(TextColor.ANSI.YELLOW);
         g.putString(x, y++, "Backpack:");
         g.setForegroundColor(TextColor.ANSI.WHITE);
-        g.putString(x, y++, "Food: 3");
-        g.putString(x, y++, "Elixirs: 3");
-        g.putString(x, y++, "Weapons: 3");
-        g.putString(x, y, "Scrolls: 3");
+        g.putString(x, y++, "Food: " + player.getBackpack().getCount(ItemTypes.Type.FOOD));
+        g.putString(x, y++, "Elixirs: " + player.getBackpack().getCount(ItemTypes.Type.ELIXIR));
+        g.putString(x, y++, "Weapons: " + player.getBackpack().getCount(ItemTypes.Type.WEAPON));
+        g.putString(x, y, "Scrolls: " + player.getBackpack().getCount(ItemTypes.Type.SCROLLS));
+        g.putString(x, y, "Medkits: " + player.getBackpack().getCount(ItemTypes.Type.MEDKIT));
     }
 
     // --- Вспомогательные методы ---
@@ -150,4 +174,3 @@ public class GameRenderer {
         };
     }
 }
-

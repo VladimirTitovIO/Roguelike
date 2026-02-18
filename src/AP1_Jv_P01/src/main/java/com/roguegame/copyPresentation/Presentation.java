@@ -7,6 +7,7 @@ import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFontConfiguration;
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
+import com.roguegame.domain.Character;
 import com.roguegame.domain.ScoreEntry;
 
 import java.awt.*;
@@ -66,23 +67,25 @@ public class Presentation {
 
     // Главный игровой цикл
     private static void runGameLoop(Screen screen) throws IOException {
+        Controller controller = new Controller();
+        Character player = controller.getPlayer();
+
         while (true) {
             // Рендерим текущее состояние
-            switch (Controller.getCurrentState()) {
+            switch (controller.getCurrentState()) {
                 case START_SCREEN:
                     ScreenManager.renderStartScreen(screen);
                     break;
                 case MENU_SCREEN:
-                    ScreenManager.renderMenuScreen(screen, Controller.getCurrentMenuLine());
+                    ScreenManager.renderMenuScreen(screen, controller.getCurrentMenuLine());
                     break;
                 case GAME_SCREEN:
                     ScreenManager.renderLevel(
                             screen,
-                            Controller.getPlayerX(),
-                            Controller.getPlayerY(),
+                            controller,
                             Controller.isShowingMenu(),
                             Controller.getCurrentMenuType(),
-                            Controller.getCurrentMenuItems()
+                            controller.getCurrentMenuItems()
                     );
                     break;
                 case SCOREBOARD_SCREEN:
@@ -91,8 +94,11 @@ public class Presentation {
                     //List<ScoreEntry> scores = leaderboardService.loadLeaderboard();
                     //ScreenManager.scoreboardScreen(screen, scores);
                     List<ScoreEntry> scores = new ArrayList<>();
-                    scores.add(new ScoreEntry(123, 7, 15, 3, 2, 1, 45, 10, 200));
-                    scores.add(new ScoreEntry(89, 5, 10, 2, 1, 0, 30, 5, 150));
+                    scores.add(new ScoreEntry(player.getGold(), controller.getWorld().getLevelNumber(),
+                            controller.getEnemiesKilled(), controller.getFoodUsed(),
+                            controller.getElixirsUsed(), controller.getScrollsUsed(),
+                            controller.getAttacksLanded(), controller.getAttacksMissed(),
+                            controller.getMovesMade()));
                     ScreenManager.renderScoreboardScreen(screen, scores);
                     break;
                 case DEAD_SCREEN:
@@ -116,7 +122,7 @@ public class Presentation {
                 continue;
             }
 
-            Controller.handleInput(key, screen);
+            controller.handleInput(key, screen);
         }
     }
 

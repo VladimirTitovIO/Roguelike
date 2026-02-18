@@ -15,7 +15,6 @@ public class GameRenderer {
 
     public static final int LEVEL_WIDTH = DungeonLevel.WIDTH;
     public static final int LEVEL_HEIGHT = DungeonLevel.HEIGHT;
-    public static final int VIEW_RADIUS = Controller.VIEW_RADIUS;
 
     /**
      * Отрисовывает игровую карту с учётом видимости и освещённости.

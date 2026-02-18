@@ -3,7 +3,9 @@ package com.roguegame.copyPresentation;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
+import com.roguegame.domain.Character;
 import com.roguegame.domain.DungeonLevel;
+import com.roguegame.domain.Item;
 import com.roguegame.domain.ScoreEntry;
 
 import java.io.IOException;
@@ -13,6 +15,8 @@ import java.util.List;
  * Отрисовка всех экранов: старт, меню, победа, поражение, рекорды, игра.
  * НЕ отрисовывает игровой процесс — делегирует это GameRenderer.
  */
+
+
 public class ScreenManager {
 
     /* --------------------------  константы  -------------------------- */
@@ -21,8 +25,8 @@ public class ScreenManager {
     public static final int TERMINAL_WIDTH = Presentation.TERMINAL_WIDTH;
     public static final int TERMINAL_HEIGHT = Presentation.TERMINAL_HEIGHT;
 
-    /* ----------------------  публичный high-level API  --------------- */
 
+    /* ----------------------  публичный high-level API  --------------- */
     // полноэкранные сообщения (старт/победа/поражение)
     public static void renderFullscreenMessage(Screen screen, MessageType type) throws IOException {
         screen.clear();
@@ -31,11 +35,13 @@ public class ScreenManager {
 
         MessageDesc desc = buildMessageDesc(type);
 
-        // ASCII-арт, центрированный в верхней части экрана
+        // рисуем ASCII-арт, центрированный в верхней части экрана
         drawAsciiArtCentered(graphics, desc.art(), desc.color(), 0, 0, TERMINAL_WIDTH, 24);
+
 
         // подсказка
         drawStringCentered(TextColor.ANSI.WHITE, graphics, desc.prompt(), 0, TERMINAL_HEIGHT - 15, TERMINAL_WIDTH);
+
 
         screen.refresh();
     }
@@ -66,11 +72,12 @@ public class ScreenManager {
                 TERMINAL_WIDTH);
 
         // рамка
-        int boxX = (screen.getTerminalSize().getColumns() - " <<<SCOREBOARD>>> ".length()) / 2;
+        int boxX = (TERMINAL_WIDTH - " <<<SCOREBOARD>>> ".length()) / 2;
         int boxY = 6;
         int boxW = "<<<SCOREBOARD>>>".length() + 2;
-        int boxH = 8;
-        drawBox(graphics, boxX, boxY, boxW, boxH, TextColor.ANSI.WHITE, TextColor.ANSI.BLACK);
+            int boxH = 8;
+        drawBox(graphics, boxX, boxY, boxW, boxH,
+                TextColor.ANSI.WHITE, TextColor.ANSI.BLACK);
 
         // пункты меню
         String[] items = {"NEW GAME", "LOAD GAME", "SCOREBOARD", "EXIT GAME"};
@@ -88,15 +95,17 @@ public class ScreenManager {
     }
 
     // основной игровой экран
-    public static void renderLevel(Screen screen, int playerX, int playerY, boolean showingMenu,
-                                   String currentMenuType, List<String> currentMenuItems) throws IOException {
+    public static void renderLevel(Screen screen, Controller controller, boolean showingMenu,
+                                   String currentMenuType, List<Item> currentMenuItems) throws IOException {
         TextGraphics graphics = screen.newTextGraphics();
         screen.clear();
 
-        // Отрисовка карты и игрока — делегировано GameRenderer
-        GameRenderer.renderMap(graphics, Controller.getCurrentLevel());
-        GameRenderer.renderPlayer(graphics, playerX, playerY);
-        GameRenderer.renderUIPanel(graphics);
+        Character player = controller.getPlayer();
+
+
+        GameRenderer.renderMap(graphics, controller);
+        GameRenderer.renderPlayer(graphics, player.getPosX(), player.getPosY());
+        GameRenderer.renderUIPanel(graphics, controller);
 
         if (showingMenu) {
             drawMenu(screen, graphics, currentMenuType, currentMenuItems);
@@ -105,8 +114,7 @@ public class ScreenManager {
         // подсказка внизу
         drawStringCentered(TextColor.ANSI.WHITE, graphics,
                 "WASD to move | J/K/H/E to use items | ESC to quit", 0,
-                TERMINAL_HEIGHT - 3, screen.getTerminalSize().getColumns());
-
+                TERMINAL_HEIGHT - 3, TERMINAL_WIDTH);
         screen.refresh();
     }
 
@@ -142,7 +150,8 @@ public class ScreenManager {
         drawTable(g, startX, startY + 2, headers, rows, 14);
 
         // подсказка
-        drawStringCentered(TextColor.ANSI.WHITE, g, "Press ESCAPE to exit...", 0, startY + 25, TERMINAL_WIDTH);
+        drawStringCentered(TextColor.ANSI.WHITE, g, "Press ESCAPE to exit", 0, startY + 25, TERMINAL_WIDTH);
+
 
         screen.refresh();
     }
@@ -184,14 +193,17 @@ public class ScreenManager {
 
         g.setForegroundColor(color);
 
+        // верхняя строка - выравниваем по ширине области
         String first = lines[0].trim();
         int startX = areaX + (areaW - first.length()) / 2;
         int startY = areaY + (areaH - lines.length) / 2;
 
+        // рисуем все строки, начиная с одного и того же X
         for (int i = 0; i < lines.length; i++) {
             g.putString(startX, startY + i, lines[i]);
         }
     }
+
 
     // Одна строка по центру
     private static void drawStringCentered(TextColor.ANSI color, TextGraphics g, String text,
@@ -230,7 +242,7 @@ public class ScreenManager {
     }
 
     private static void drawMenu(Screen screen, TextGraphics g,
-                                 String currentMenuType, List<String> currentMenuItems) {
+                                 String currentMenuType, List<Item> currentMenuItems) {
         int menuX = 1;
         int menuY = LEVEL_HEIGHT + 3;
 
@@ -252,11 +264,11 @@ public class ScreenManager {
     private static MessageDesc buildMessageDesc(MessageType type) {
         return switch (type) {
             case START -> new MessageDesc(START_ART, TextColor.ANSI.GREEN,
-                    "Press any key to continue...");
+                    "Press any key to continue");
             case VICTORY -> new MessageDesc(VICTORY_ART, TextColor.ANSI.GREEN,
-                    "Congratulations! Press any key to continue...");
-            case DEFEAT -> new MessageDesc(DEFEAT_ART, TextColor.ANSI.RED,
-                    "You have fallen... Press any key to continue...");
+                    "Congratulations! Press any key to continue");
+                case DEFEAT -> new MessageDesc(DEFEAT_ART, TextColor.ANSI.RED,
+                        "You have fallen. Press any key to continue");
         };
     }
 

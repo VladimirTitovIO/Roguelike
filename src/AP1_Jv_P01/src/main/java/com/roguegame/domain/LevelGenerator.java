@@ -72,8 +72,9 @@ public class LevelGenerator {
         return pool;
     }
 
-    public List<Enemy> generateLevelEnemies(int level, double struggleCounter) {
+    public List<Enemy> generateLevelEnemies(int level, double struggleCounter, Character player) {
         List<Enemy> enemiesAtLevel = new ArrayList<>();
+        int playerRoom = getLevel().getRoomAt(player.getPosX(), player.getPosY());
         int baseEnemies = 6;
         double ratio = 1.0 - struggleCounter;
         int extraEnemies = (int) Math.round(level * ratio * 0.5);
@@ -81,6 +82,7 @@ public class LevelGenerator {
         Enemy.Type randomEnemy = null;
         for (int i = 0; i < totalEnemies; i++) {
             int room = random.nextInt(0, 9);
+            while (room == playerRoom) room = random.nextInt(0, 9);
             if (level < 3) {
                 randomEnemy = Enemy.Type.getEasyEnemy();
             }

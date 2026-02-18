@@ -113,7 +113,7 @@ public class ScreenManager {
 
         // подсказка внизу
         drawStringCentered(TextColor.ANSI.WHITE, graphics,
-                "WASD to move | J/K/H/E to use items | ESC to quit", 0,
+                "WASD to move | J/K/H/E/L/T to use items | ESC to quit", 0,
                 TERMINAL_HEIGHT - 3, TERMINAL_WIDTH);
         screen.refresh();
     }

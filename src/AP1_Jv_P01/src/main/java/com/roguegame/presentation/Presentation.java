@@ -70,7 +70,7 @@ public class Presentation {
         Controller controller = new Controller();
         Character player = controller.getPlayer();
 
-        while (true) {
+        while (controller.getWorld().getLevelNumber() < 20) {
             // Рендерим текущее состояние
             switch (controller.getCurrentState()) {
                 case START_SCREEN:
@@ -114,15 +114,24 @@ public class Presentation {
             KeyStroke key = screen.readInput();
             if (key == null) {
                 try {
-                    Thread.sleep(50); // Небольшая пауза для снижения нагрузки на CPU
+                    Thread.sleep(50);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    break; // Прерываем цикл при прерывании потока
+                    break;
                 }
                 continue;
             }
 
             controller.handleInput(key, screen);
+            if (controller.getCurrentState() == Controller.GameState.GAME_SCREEN) {
+                controller.enemyTurns();
+                if (!controller.getPlayer().isAlive()) {
+                    controller.setCurrentState(Controller.GameState.DEAD_SCREEN);
+                }
+            }
+            if (controller.getWorld().getLevelNumber() >= 20) {
+                controller.setCurrentState(Controller.GameState.ENDGAME_SCREEN);
+            }
         }
     }
 

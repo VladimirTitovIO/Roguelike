@@ -15,7 +15,6 @@ public interface GameMap {
         WALL,
         DOOR,
         CORRIDOR,
-        EXIT
     }
     enum Direction {
         UP,

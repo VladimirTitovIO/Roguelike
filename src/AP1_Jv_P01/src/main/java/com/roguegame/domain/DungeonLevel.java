@@ -26,6 +26,8 @@ public class DungeonLevel implements GameMap {
     private static final int MIN_LOCKED_DOORS = 1;
     private static final int MAX_LOCKED_DOORS = 3;
 
+    private Position startPosition;
+    private Position exitPosition;
     // tiles[x][y]
     private TileType[][] tiles;
     private final Random random = new Random();
@@ -110,7 +112,8 @@ public class DungeonLevel implements GameMap {
                 tiles[x][y] = TileType.WALL;
             }
         }
-
+        startPosition = null;
+        exitPosition = null;
         // Можно сразу поставить рамку, но всё равно в конце мы её запечатываем ещё раз
         enforceBorderWalls();
     }
@@ -121,6 +124,9 @@ public class DungeonLevel implements GameMap {
         while (endIdx == startIdx) endIdx = random.nextInt(ROOMS_NUM);
         startRoom = rooms[startIdx];
         endRoom = rooms[endIdx];
+
+        startPosition = getSafePosition(startRoom);
+        exitPosition = getSafePosition(endRoom);
     }
 
     /**
@@ -306,6 +312,7 @@ public class DungeonLevel implements GameMap {
     //  Locks + Keys + Anti-softlock validation
 
     private boolean generateLocksAndKeysNoSoftlock() {
+
         if (doorPositions.isEmpty()) return false;
 
         keysOnGround.clear();
@@ -366,13 +373,10 @@ public class DungeonLevel implements GameMap {
     }
 
     private Position pickKeyPosition(Set<Position> reachable) {
-        Position start = getStartPosition();
-        Position exit = getExitPosition();
-
         List<Position> options = new ArrayList<>();
         for (Position p : reachable) {
             if (isBorder(p.x, p.y)) continue;
-            if (p.equals(start) || p.equals(exit)) continue;
+            if (p.equals(startPosition) || p.equals(exitPosition)) continue;
             if (getTile(p.x, p.y) != TileType.FLOOR) continue;
             options.add(p);
         }
@@ -381,12 +385,11 @@ public class DungeonLevel implements GameMap {
     }
 
     private Set<Position> reachablePositionsWithMask(int keyMask) {
-        Position start = getStartPosition();
         ArrayDeque<Position> q = new ArrayDeque<>();
         Set<Position> seen = new HashSet<>();
 
-        q.add(start);
-        seen.add(start);
+        q.add(startPosition);
+        seen.add(startPosition);
 
         while (!q.isEmpty()) {
             Position cur = q.removeFirst();
@@ -406,15 +409,12 @@ public class DungeonLevel implements GameMap {
     }
 
     private boolean validateNoSoftlockBfs() {
-        Position start = getStartPosition();
-        Position exit = getExitPosition();
-
         int maxMask = 1 << DoorColor.values().length; // 8
         boolean[][][] seen = new boolean[WIDTH][HEIGHT][maxMask];
         ArrayDeque<State> q = new ArrayDeque<>();
 
-        q.add(new State(start.x, start.y, 0));
-        seen[start.x][start.y][0] = true;
+        q.add(new State(startPosition.x, startPosition.y, 0));
+        seen[startPosition.x][startPosition.y][0] = true;
 
         while (!q.isEmpty()) {
             State s = q.removeFirst();
@@ -426,7 +426,7 @@ public class DungeonLevel implements GameMap {
                 mask |= (1 << key.ordinal());
             }
 
-            if (s.x == exit.x && s.y == exit.y) {
+            if (s.x == exitPosition.x && s.y == exitPosition.y) {
                 return true;
             }
 
@@ -479,24 +479,23 @@ public class DungeonLevel implements GameMap {
     @Override
     public TileType getTile(int x, int y) {
         if (!inBounds(x, y)) return TileType.WALL;
-        if (x == getExitPosition().x && y == getExitPosition().y) return TileType.EXIT;
         return tiles[x][y];
     }
 
     @Override
     public boolean isWalkable(int x, int y) {
         TileType t = getTile(x, y);
-        return t == TileType.FLOOR || t == TileType.CORRIDOR || t == TileType.DOOR || t == TileType.EXIT;
+        return t == TileType.FLOOR || t == TileType.CORRIDOR || t == TileType.DOOR;
     }
 
     // -------------------- Public helpers for other game logic --------------------
 
     public Position getStartPosition() {
-        return getSafePosition(startRoom);
+        return startPosition;
     }
 
     public Position getExitPosition() {
-        return getSafePosition(endRoom);
+        return exitPosition;
     }
 
     public Map<Position, Door> getDoors() {

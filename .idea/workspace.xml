@@ -5,15 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5b3f254e-efca-4156-a8ec-5016c75f3a67" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/datalayer/SaveGameService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/datalayer/SaveGameService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Backpack.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Backpack.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Character.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Character.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Combat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Combat.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Entity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/MapTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/MapTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/World.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/DungeonLevel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/DungeonLevel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/GameMap.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/GameMap.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/Presentation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/Presentation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/GameRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/GameRenderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/ScreenManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/ScreenManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -103,6 +100,7 @@
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
+    "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.editor.selected.configurable": "preferences.lookFeel",
     "vue.rearranger.settings.migration": "true"
   }
@@ -164,7 +162,8 @@
       <workItem from="1771055328127" duration="28532000" />
       <workItem from="1771144721349" duration="8123000" />
       <workItem from="1771218820143" duration="18375000" />
-      <workItem from="1771314018080" duration="24025000" />
+      <workItem from="1771314018080" duration="31517000" />
+      <workItem from="1771404664459" duration="7640000" />
     </task>
     <servers />
   </component>

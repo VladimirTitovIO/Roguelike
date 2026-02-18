@@ -119,9 +119,9 @@ public class World {
             Enemy other = getEnemyAtPosition(newPosX, newPosY);
             if (other != null) {
                 handleCombat((Character) e, other);
+                removeDead();
                 return false;
             }
-
         }
         if (!level.isWalkable(newPosX, newPosY) || isTileOccupiedFor(e, newPosX, newPosY)) {
             return false;
@@ -140,6 +140,10 @@ public class World {
         if (enemy.getHealth() <= 0) {
            enemy.setAlive(false);
         }
+    }
+
+    public void removeDead() {
+        enemies.removeIf(e -> !e.isAlive());
     }
 
     public boolean tryToTeleport(Enemy e, int x, int y) {

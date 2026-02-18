@@ -5,8 +5,6 @@ import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
 import com.roguegame.domain.*;
 import com.roguegame.domain.Character;
-import com.roguegame.domain.DungeonLevel.Position;
-import com.roguegame.domain.GameMap.TileType;
 
 import java.io.IOException;
 import java.util.List;

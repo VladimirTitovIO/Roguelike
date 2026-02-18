@@ -210,11 +210,6 @@ public class Controller {
                 if (c == 's' || c == 'S') moved = world.tryToMove(player, GameMap.Direction.DOWN);
                 if (c == 'a' || c == 'A') moved = world.tryToMove(player, GameMap.Direction.LEFT);
                 if (c == 'd' || c == 'D') moved = world.tryToMove(player, GameMap.Direction.RIGHT);
-                if (c == 'u') {
-                    for (Enemy e : world.getEnemies()) {
-                        System.out.println(e);
-                    }
-                }
                 if (moved) {
                     calculateFOV();
                     updateExplored();

@@ -147,8 +147,8 @@ public class Controller {
 
     // Обработка нажатия клавиши
     public void handleInput(KeyStroke key, Screen screen) throws IOException {
-        // Обработка ESC для возврата в меню из любого состояния, кроме START_SCREEN
-        if (key.getKeyType() == KeyType.Escape && currentState != GameState.START_SCREEN) {
+        // Обработка ESC для возврата в меню из любого состояния, кроме START_SCREEN и меню выбора инвентаря
+        if (key.getKeyType() == KeyType.Escape && currentState != GameState.START_SCREEN && !showingMenu) {
             currentState = GameState.MENU_SCREEN;
             return; // Прерываем дальнейшую обработку
         }
@@ -238,7 +238,7 @@ public class Controller {
         if (world.getPlayer().getPosX() == world.getLevel().getExitPosition().x &&
                 world.getPlayer().getPosY() == world.getLevel().getExitPosition().y) {
             ScreenManager.showMessage(screen, "You found the exit! Next level!");
-//            currentState = GameState.ENDGAME_SCREEN; // уточнить !!!
+//            currentState = GameState.ENDGAME_SCREEN;
             world.initNewLevel();
             resetGame();
         }
@@ -267,8 +267,10 @@ public class Controller {
                     ScreenManager.showMessage(screen, "Used: " + selectedItem);
                     player.getBackpack().useItem(currentMenuItems.get(index), player);
                     if (currentMenuItems.get(index).getType() == ItemTypes.Type.FOOD) setFoodUsed(getFoodUsed() + 1);
-                    if (currentMenuItems.get(index).getType() == ItemTypes.Type.ELIXIR) setElixirsUsed(getElixirsUsed() + 1);
-                    if (currentMenuItems.get(index).getType() == ItemTypes.Type.SCROLLS) setScrollsUsed(getScrollsUsed() + 1);
+                    if (currentMenuItems.get(index).getType() == ItemTypes.Type.ELIXIR)
+                        setElixirsUsed(getElixirsUsed() + 1);
+                    if (currentMenuItems.get(index).getType() == ItemTypes.Type.SCROLLS)
+                        setScrollsUsed(getScrollsUsed() + 1);
                     closeMenu();
                 }
             }
@@ -287,42 +289,6 @@ public class Controller {
         currentMenuItems.clear();
     }
 
-    // Движение игрока
-    private void movePlayer(int dx, int dy) {
-        Character player = world.getPlayer();
-        int newX = player.getPosX() + dx;
-        int newY = player.getPosY() + dy;
-
-        if (canMove(newX, newY)) {
-            player.setPosX(newX);
-            player.setPosY(newY);
-            calculateFOV(); // Пересчитываем видимость
-            updateExplored(); // Обновляем исследованные клетки
-        }
-    }
-
-    private boolean canMove(int x, int y) {
-        if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
-            return false;
-        }
-
-        GameMap.TileType tile = world.getLevel().getTile(x, y);
-        if (tile == GameMap.TileType.WALL) {
-            return false;
-        }
-
-        if (tile == GameMap.TileType.DOOR) {
-            Position pos = new Position(x, y);
-            var door = world.getLevel().getDoors().get(pos);
-            if (door != null && door.locked) {
-                // Пока нет системы ключей — просто запрещаем проход
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     // Обновляем исследованные клетки при движении
     private void updateExplored() {
         // Отмечаем все клетки, которые видны прямо сейчас, как исследованные
@@ -333,15 +299,6 @@ public class Controller {
                 }
             }
         }
-    }
-
-    // Метод проверки видимости
-    // упрощённая версия — видим только квадрат вокруг игрока
-    boolean isVisible(int x, int y) {
-        // Проверяем, находится ли клетка в квадратном радиусе
-        int dx = Math.abs(x - world.getPlayer().getPosX());
-        int dy = Math.abs(y - world.getPlayer().getPosY());
-        return dx <= VIEW_RADIUS && dy <= VIEW_RADIUS;
     }
 
     // Сброс исследованных клеток при новой игре

@@ -52,7 +52,7 @@ public class GameRenderer {
             return;
         }
         for (Enemy e : controller.getWorld().getEnemies()) {
-            if (e.getPosX() == x && e.getPosY() == y) {
+            if (e.getPosX() == x && e.getPosY() == y && e.isVisible()) {
                 g.setForegroundColor(TextColor.ANSI.RED);
                 g.setCharacter(x, y, 'O');
                 return;
@@ -144,7 +144,7 @@ public class GameRenderer {
         g.putString(x, y++, "Gold: " + player.getGold());
         g.putString(x, y++, "Health: " + player.getHealth() + "/" + player.getMaximumHealth());
         g.putString(x, y++, "Agility: " + player.getAgility());
-        g.putString(x, y++, "Strength: " + player.getStrength() + "(" + player.getWeapon().getSubtype() + " " + player.getWeaponStrength() +")");
+        g.putString(x, y++, "Strength: " + player.getStrength() + "(" + player.getWeapon().getSubtype() + ")");
         y++;
 
         g.setForegroundColor(TextColor.ANSI.YELLOW);
@@ -153,8 +153,9 @@ public class GameRenderer {
         g.putString(x, y++, "Food: " + player.getBackpack().getCount(ItemTypes.Type.FOOD));
         g.putString(x, y++, "Elixirs: " + player.getBackpack().getCount(ItemTypes.Type.ELIXIR));
         g.putString(x, y++, "Weapons: " + player.getBackpack().getCount(ItemTypes.Type.WEAPON));
-        g.putString(x, y, "Scrolls: " + player.getBackpack().getCount(ItemTypes.Type.SCROLLS));
-        g.putString(x, y, "Medkits: " + player.getBackpack().getCount(ItemTypes.Type.MEDKIT));
+        g.putString(x, y++, "Scrolls: " + player.getBackpack().getCount(ItemTypes.Type.SCROLLS));
+        g.putString(x, y++, "Medkits: " + player.getBackpack().getCount(ItemTypes.Type.MEDKIT));
+        g.putString(x, y++, "Treasures: " + player.getBackpack().getCount(ItemTypes.Type.TREASURE));
     }
 
     // --- Вспомогательные методы ---

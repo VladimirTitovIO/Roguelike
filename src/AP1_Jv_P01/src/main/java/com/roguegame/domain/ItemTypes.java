@@ -55,10 +55,10 @@ public class ItemTypes {
     }
 
     public enum Subtype {
-        FISTS(ItemTypes.Type.WEAPON, 0, 0, 0, 1, 0, 0),
-        AXE(ItemTypes.Type.WEAPON, 0, 0, 0, 4, 0, 2),
-        SWORD(ItemTypes.Type.WEAPON, 0, 0, 0, 2, 0, 5),
-        MACE(ItemTypes.Type.WEAPON, 0, 0, 0, 3, 0, 3),
+        FISTS(ItemTypes.Type.WEAPON, 0, 0, 0, 3, 0, 0),
+        AXE(ItemTypes.Type.WEAPON, 0, 0, 0, 7, 0, 2),
+        SWORD(ItemTypes.Type.WEAPON, 0, 0, 0, 5, 0, 5),
+        MACE(ItemTypes.Type.WEAPON, 0, 0, 0, 6, 0, 3),
 
         MEDKIT_SMALL(ItemTypes.Type.MEDKIT, 12, 0, 0, 0, 0, 5),
         MEDKIT_MEDIUM(ItemTypes.Type.MEDKIT, 18, 0, 0, 0, 0, 3),

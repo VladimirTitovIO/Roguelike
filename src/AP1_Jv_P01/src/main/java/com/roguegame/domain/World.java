@@ -7,7 +7,7 @@ import com.roguegame.domain.GameMap.Direction;
 public class World {
     private List<Enemy> enemies;
     private List<Item> items;
-    private final Character player;
+    private Character player;
     private DungeonLevel level;
     private int levelNumber;
     private Map<DungeonLevel.Position, DungeonLevel.DoorColor> keys;
@@ -60,23 +60,32 @@ public class World {
         struggleCounter = 0.5;
         DungeonLevel.Position start = level.getStartPosition();
         player = new Character(start.x, start.y);
+        if (!player.isAlive()) {
+            player = new Character(start.x, start.y);
+            player.setAlive(true);
+        }
         LevelGenerator lg = new LevelGenerator(level);
-        enemies = lg.generateLevelEnemies(levelNumber, struggleCounter);
+        enemies = lg.generateLevelEnemies(levelNumber, struggleCounter, player);
         items = lg.generateLevelItems(levelNumber, struggleCounter);
     }
 
     public void initNewLevel() {
         level = new DungeonLevel();
         setLevel(level);
+        if (!player.isAlive()) {
+            player = new Character(level.getStartPosition().x, level.getStartPosition().y);
+            player.setAlive(true);
+            player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_SMALL, 0, 0));
+            player.getBackpack().addItem(new Item(ItemTypes.Subtype.SWORD, 0, 0));
+            player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_SMALL, 0, 0));
+        }
+        player.getKeys().clear();
         items.clear();
         enemies.clear();
         LevelGenerator lg = new LevelGenerator(level);
-        player.setPosX(level.getStartPosition().x);
-        player.setPosY(level.getStartPosition().y);
-        player.getKeys().clear();
         setLevelNumber(levelNumber + 1);
         setItems(lg.generateLevelItems(levelNumber, struggleCounter));
-        setEnemies(lg.generateLevelEnemies(levelNumber, struggleCounter));
+        setEnemies(lg.generateLevelEnemies(levelNumber, struggleCounter, player));
         scaleEnemiesStrength(levelNumber, enemies);
     }
 
@@ -379,7 +388,7 @@ public class World {
 //        return index;
 //    }
 
-    private boolean dropItemNear(Character player, Item weapon) {
+    public boolean dropItemNear(Character player, Item weapon) {
         Direction[] directions = {
                 Direction.UP,
                 Direction.DOWN,
@@ -395,12 +404,11 @@ public class World {
                 case LEFT -> nx--;
                 case RIGHT -> nx++;
             }
+            if (!getLevel().isWalkable(nx, ny)) continue;
             if (isTileBlocked(nx, ny)) continue;
-            if (getLevel().isWalkable(nx, ny)) {
-                weapon.dropItemAt(nx, ny);
-                items.add(weapon);
-                return true;
-            }
+            weapon.dropItemAt(nx, ny);
+            items.add(weapon);
+            return true;
         }
         return false;
     }
@@ -412,7 +420,7 @@ public class World {
             }
         }
         for (Enemy e : enemies) {
-            if (e.getPosX() == x || e.getPosY() == y) {
+            if (e.getPosX() == x && e.getPosY() == y) {
                 return true;
             }
         }

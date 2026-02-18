@@ -5,8 +5,7 @@ import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
 import com.roguegame.domain.*;
 import com.roguegame.domain.Character;
-import com.roguegame.domain.DungeonLevel.Position;
-import com.roguegame.domain.GameMap.TileType;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -73,7 +72,7 @@ public class ScreenManager {
                 TERMINAL_WIDTH);
 
         // рамка
-        int boxX = (screen.getTerminalSize().getColumns() - " <<<SCOREBOARD>>> ".length()) / 2;
+        int boxX = (TERMINAL_WIDTH - " <<<SCOREBOARD>>> ".length()) / 2;
         int boxY = 6;
         int boxW = "<<<SCOREBOARD>>>".length() + 2;
             int boxH = 8;
@@ -115,7 +114,7 @@ public class ScreenManager {
         // подсказка внизу
         drawStringCentered(TextColor.ANSI.WHITE, graphics,
                 "WASD to move | J/K/H/E to use items | ESC to quit", 0,
-                TERMINAL_HEIGHT - 3, screen.getTerminalSize().getColumns());
+                TERMINAL_HEIGHT - 3, TERMINAL_WIDTH);
         screen.refresh();
     }
 
@@ -128,7 +127,7 @@ public class ScreenManager {
         int startY = 5;
 
         // заголовок
-        drawStringCentered(TextColor.ANSI.WHITE, g, "Press ESCAPE to exit...", 0, startY + 25, TERMINAL_WIDTH);
+        drawStringCentered(TextColor.ANSI.GREEN, g, "=== SCOREBOARD ===", 0, startY, TERMINAL_WIDTH);
 
         // подготовим данные для универсальной drawTable
         String[] headers = {"Treasures", "Level", "Enemies", "Food",
@@ -151,8 +150,8 @@ public class ScreenManager {
         drawTable(g, startX, startY + 2, headers, rows, 14);
 
         // подсказка
-        drawStringCentered(TextColor.ANSI.WHITE, g, "Press ESCAPE to exit...", 0, startY + 25,
-                screen.getTerminalSize().getColumns());
+        drawStringCentered(TextColor.ANSI.WHITE, g, "Press ESCAPE to exit", 0, startY + 25, TERMINAL_WIDTH);
+
 
         screen.refresh();
     }
@@ -265,11 +264,11 @@ public class ScreenManager {
     private static MessageDesc buildMessageDesc(MessageType type) {
         return switch (type) {
             case START -> new MessageDesc(START_ART, TextColor.ANSI.GREEN,
-                    "Press any key to continue...");
+                    "Press any key to continue");
             case VICTORY -> new MessageDesc(VICTORY_ART, TextColor.ANSI.GREEN,
-                    "Congratulations! Press any key to continue...");
-            case DEFEAT -> new MessageDesc(DEFEAT_ART, TextColor.ANSI.RED,
-                    "You have fallen... Press any key to continue...");
+                    "Congratulations! Press any key to continue");
+                case DEFEAT -> new MessageDesc(DEFEAT_ART, TextColor.ANSI.RED,
+                        "You have fallen. Press any key to continue");
         };
     }
 

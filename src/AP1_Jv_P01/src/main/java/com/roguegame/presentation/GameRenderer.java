@@ -2,12 +2,11 @@ package com.roguegame.presentation;
 
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
+import com.roguegame.domain.*;
 import com.roguegame.domain.Character;
-import com.roguegame.domain.DungeonLevel;
 import com.roguegame.domain.DungeonLevel.DoorColor;
 import com.roguegame.domain.DungeonLevel.Position;
 import com.roguegame.domain.GameMap.TileType;
-import com.roguegame.domain.ItemTypes;
 
 /**
  * Отвечает за отрисовку игрового уровня
@@ -28,16 +27,16 @@ public class GameRenderer {
                 boolean isSeen = controller.isExplored(x, y);
                 boolean isVisibleNow = controller.isCurrentlyVisible(x, y);
 
-                renderTile(g, tile, x, y, isSeen, isVisibleNow, controller.getLevel());
+                renderTile(g, tile, x, y, isSeen, isVisibleNow, controller);
             }
         }
         renderKeys(g, controller);
     }
 
     private static void renderTile(TextGraphics g, TileType tile, int x, int y,
-                                   boolean isSeen, boolean isVisibleNow, DungeonLevel level) {
+                                   boolean isSeen, boolean isVisibleNow, Controller controller) {
         if (isVisibleNow) {
-            drawVisibleTile(g, tile, x, y, level);
+            drawVisibleTile(g, tile, x, y, controller);
         } else if (isSeen) {
             drawExploredTile(g, tile, x, y);
         } else {
@@ -45,7 +44,27 @@ public class GameRenderer {
         }
     }
 
-    private static void drawVisibleTile(TextGraphics g, TileType tile, int x, int y, DungeonLevel level) {
+    private static void drawVisibleTile(TextGraphics g, TileType tile, int x, int y, Controller controller) {
+        DungeonLevel.Position exit = controller.getLevel().getExitPosition();
+        if (exit.x == x && exit.y == y) {
+            g.setForegroundColor(TextColor.ANSI.CYAN);
+            g.setCharacter(x, y, 'E');
+            return;
+        }
+        for (Enemy e : controller.getWorld().getEnemies()) {
+            if (e.getPosX() == x && e.getPosY() == y) {
+                g.setForegroundColor(TextColor.ANSI.RED);
+                g.setCharacter(x, y, 'O');
+                return;
+            }
+        }
+        for (Item i : controller.getWorld().getItems()) {
+            if (i.getPosX() == x && i.getPosY() == y) {
+                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setCharacter(x, y, 'I');
+                return;
+            }
+        }
         switch (tile) {
             case WALL:
                 g.setForegroundColor(TextColor.ANSI.WHITE);
@@ -60,11 +79,7 @@ public class GameRenderer {
                 g.setCharacter(x, y, '.');
                 break;
             case DOOR:
-                renderDoor(g, x, y, level);
-                break;
-            case EXIT:
-                g.setForegroundColor(TextColor.ANSI.CYAN);
-                g.setCharacter(x, y, 'E');
+                renderDoor(g, x, y, controller.getLevel());
                 break;
             default:
                 g.setForegroundColor(TextColor.ANSI.WHITE);

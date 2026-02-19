@@ -95,9 +95,9 @@ public class Presentation {
                     //ScreenManager.scoreboardScreen(screen, scores);
                     List<ScoreEntry> scores = new ArrayList<>();
                     scores.add(new ScoreEntry(player.getGold(), controller.getWorld().getLevelNumber(),
-                            controller.getEnemiesKilled(), controller.getFoodUsed(),
+                            controller.getPlayer().getEnemiesKilled(), controller.getFoodUsed(),
                             controller.getElixirsUsed(), controller.getScrollsUsed(),
-                            controller.getAttacksLanded(), controller.getAttacksMissed(),
+                            controller.getPlayer().getAttacksLanded(), controller.getPlayer().getAttacksMissed(),
                             controller.getMovesMade()));
                     ScreenManager.renderScoreboardScreen(screen, scores);
                     break;

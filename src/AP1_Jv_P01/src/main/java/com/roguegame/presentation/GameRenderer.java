@@ -8,6 +8,8 @@ import com.roguegame.domain.DungeonLevel.DoorColor;
 import com.roguegame.domain.DungeonLevel.Position;
 import com.roguegame.domain.GameMap.TileType;
 
+import java.util.Map;
+
 /**
  * Отвечает за отрисовку игрового уровня
  */
@@ -50,13 +52,15 @@ public class GameRenderer {
             return;
         }
 
-        Enemy enemy = findEnemy(controller, x, y);
+        Map<Position, Item> itemMap = controller.getItemMap();
+        Map<Position, Enemy> enemyMap = controller.getEnemyMap();
+        Position currentPosition = new Position(x, y);
+        Enemy enemy = enemyMap.get(currentPosition);
         if (enemy != null) {
             drawEnemy(g, enemy);
             return;
         }
-
-        Item item = findItem(controller, x, y);
+        Item item = itemMap.get(currentPosition);
         if (item != null) {
             drawItem(g, item);
             return;
@@ -76,16 +80,6 @@ public class GameRenderer {
         g.setCharacter(x, y, 'E');
     }
 
-    // враг
-    private static Enemy findEnemy(Controller controller, int x, int y) {
-        for (Enemy e : controller.getWorld().getEnemies()) {
-            if (e.getPosX() == x && e.getPosY() == y && e.isVisible()) {
-                return e;
-            }
-        }
-        return null;
-    }
-
     private static void drawEnemy(TextGraphics g, Enemy e) {
         TextColor color = switch (e.getType()) {
             case OGRE -> TextColor.ANSI.YELLOW;
@@ -103,14 +97,6 @@ public class GameRenderer {
         };
         g.setForegroundColor(color);
         g.setCharacter(e.getPosX(), e.getPosY(), ch);
-    }
-
-    // предмет
-    private static Item findItem(Controller controller, int x, int y) {
-        for (Item i : controller.getWorld().getItems()) {
-            if (i.getPosX() == x && i.getPosY() == y) return i;
-        }
-        return null;
     }
 
     private static void drawItem(TextGraphics g, Item item) {

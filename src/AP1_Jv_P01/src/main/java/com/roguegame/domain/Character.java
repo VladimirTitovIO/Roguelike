@@ -14,6 +14,33 @@ public class Character extends Entity {
     private Item weapon;
     private final Map<ItemTypes.Subtype, Integer> activeBuffs;
     private final Set<DungeonLevel.DoorColor> keys = new HashSet<>();
+    private int attacksLanded = 0;
+    private int attacksMissed = 0;
+    private int enemiesKilled = 0;
+
+    public int getEnemiesKilled() {
+        return enemiesKilled;
+    }
+
+    public void setEnemiesKilled(int enemiesKilled) {
+        this.enemiesKilled = enemiesKilled;
+    }
+
+    public int getAttacksLanded() {
+        return attacksLanded;
+    }
+
+    public void setAttacksLanded(int attacksLanded) {
+        this.attacksLanded = attacksLanded;
+    }
+
+    public int getAttacksMissed() {
+        return attacksMissed;
+    }
+
+    public void setAttacksMissed(int attacksMissed) {
+        this.attacksMissed = attacksMissed;
+    }
 
     public void addKey(DungeonLevel.DoorColor color) {
         keys.add(color);
@@ -100,10 +127,10 @@ public class Character extends Entity {
 
     public Character(int posX, int posY) {
         super(posX, posY);
-        maximumHealth = 25;
-        health = 25;
-        setAgility(4);
-        strength = 4;
+        maximumHealth = 35;
+        health = 35;
+        setAgility(5);
+        strength = 5;
         gold = 0;
         setSpeed(2);
         weapon = new Item(Subtype.FISTS, 0, 0);

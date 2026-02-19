@@ -95,6 +95,9 @@ public class Combat {
             if (checkIfHit(player, monster, currentTurn.getCurrentTurn())) {
                 int damage = calculatePlayerDamage(player, monster);
                 monster.setHealth(monster.getHealth() - damage);
+                player.setAttacksLanded(player.getAttacksLanded() + 1);
+            } else {
+                player.setAttacksMissed(player.getAttacksMissed() + 1);
             }
             if (monster.getHealth() <= 0) {
                 player.setGold(monster.getType().getValue() + player.getGold());

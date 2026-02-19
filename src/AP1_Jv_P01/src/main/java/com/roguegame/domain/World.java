@@ -148,11 +148,13 @@ public class World {
         c.attack(player, enemy, playerTurn);
         if (enemy.getHealth() <= 0) {
            enemy.setAlive(false);
+           player.setEnemiesKilled(player.getEnemiesKilled() + 1);
         }
     }
 
-    public void removeDead() {
-        enemies.removeIf(e -> !e.isAlive());
+    public boolean removeDead() {
+        if (enemies.removeIf(e -> !e.isAlive())) return true;
+        return false;
     }
 
     public boolean tryToTeleport(Enemy e, int x, int y) {
@@ -224,169 +226,6 @@ public class World {
         turnOrder.sort((a, b) -> Integer.compare(b.getSpeed() + b.getAgility(), a.getSpeed() + a.getAgility()));
         return turnOrder;
     }
-
-//    public void handlePlayerTurn(World w, String input, Scanner scanner, Character player) {
-//        if (Objects.equals(input, "w")) {
-//            w.tryToMove(player, GameMap.Direction.UP);
-//        } else if (Objects.equals(input, "d")) {
-//            w.tryToMove(player, GameMap.Direction.RIGHT);
-//        } else if (Objects.equals(input, "a")) {
-//            w.tryToMove(player, GameMap.Direction.LEFT);
-//        } else if (Objects.equals(input, "s")) {
-//            w.tryToMove(player, GameMap.Direction.DOWN);
-//        } else if (Objects.equals(input, "h")) {
-//            List<Item> weapons = player.getBackpack().getItems().stream().filter(i -> i.getType() == ItemTypes.Type.WEAPON).toList();
-//            int index = ListWeapons(weapons, scanner);
-//            if (index != -1) {
-//                Item oldWeapon = player.getWeapon();
-//                Item currentWeapon = weapons.get(index);
-//                if (oldWeapon.getSubtype() == ItemTypes.Subtype.FISTS) player.getBackpack().useItem(weapons.get(index), player);
-//                if (oldWeapon.getSubtype() != ItemTypes.Subtype.FISTS && oldWeapon != currentWeapon) {
-//                    if (dropItemNear(player, oldWeapon)) {
-//                        player.getBackpack().useItem(weapons.get(index), player);
-//                    }
-//                }
-//            }
-//        } else if (Objects.equals(input, "j")) {
-//            List<Item> elixirs = player.getBackpack().getItems().stream().filter(i -> i.getType() == ItemTypes.Type.ELIXIR).toList();
-//            int index = ListElixirs(elixirs, scanner);
-//            if (index != -1) {
-//                player.getBackpack().useItem(elixirs.get(index), player);
-//
-//            }
-//        } else if (Objects.equals(input, "k")) {
-//            List<Item> foods = player.getBackpack().getItems().stream().filter(i -> i.getType() == ItemTypes.Type.FOOD).toList();
-//            int index = ListFoods(foods, scanner);
-//            if (index != -1) {
-//                player.getBackpack().useItem(foods.get(index), player);
-//            }
-//        } else if (Objects.equals(input, "l")) {
-//            List<Item> medkits = player.getBackpack().getItems().stream().filter(i -> i.getType() == ItemTypes.Type.MEDKIT).toList();
-//            int index = ListMedkits(medkits, scanner);
-//            if (index != -1) {
-//                player.getBackpack().useItem(medkits.get(index), player);
-//            }
-//        } else if (Objects.equals(input, "t")) {
-//            List<Item> scrolls = player.getBackpack().getItems().stream().filter(i -> i.getType() == ItemTypes.Type.SCROLLS).toList();
-//            int index = ListScrolls(scrolls, scanner);
-//            if (index != -1) {
-//                player.getBackpack().useItem(scrolls.get(index), player);
-//            }
-//        }
-//        calculateStruggle();
-//        player.tickBuffs();
-//    }
-//
-//    private int ListWeapons(List<Item> weapons, Scanner scanner) {
-//        if (weapons.isEmpty()) {
-//            System.out.println("No weapons at the moment");
-//            return -1;
-//        }
-//        System.out.println("Weapons: ");
-//        for (int i = 0; i < weapons.size(); i++) {
-//            System.out.println(i + ": " + weapons.get(i));
-//        }
-//        if (!scanner.hasNextInt()) {
-//            System.out.println("Invalid input");
-//            scanner.nextLine();
-//            return -1;
-//        }
-//        int index = scanner.nextInt();
-//        scanner.nextLine();
-//        if (index < 0 || index >= weapons.size()) {
-//            System.out.println("Invalid index");
-//            return -1;
-//        }
-//        return index;
-//    }
-//    private int ListElixirs(List<Item> elixirs, Scanner scanner) {
-//        if (elixirs.isEmpty()) {
-//            System.out.println("No elixirs at the moment");
-//            return -1;
-//        }
-//        System.out.println("Elixirs");
-//        for (int i = 0; i < elixirs.size(); i++) {
-//            System.out.println(i + ": " + elixirs.get(i));
-//        }
-//        if (!scanner.hasNextInt()) {
-//            System.out.println("Invalid input");
-//            scanner.nextLine();
-//            return -1;
-//        }
-//        int index = scanner.nextInt();
-//        scanner.nextLine();
-//        if (index < 0 || index > elixirs.size()) {
-//            System.out.println("Invalid index");
-//            return -1;
-//        }
-//        return index;
-//    }
-//    private int ListFoods(List<Item> foods, Scanner scanner) {
-//        if (foods.isEmpty()) {
-//            System.out.println("No foods at the moment");
-//            return -1;
-//        }
-//        System.out.println("Foods");
-//        for (int i = 0; i < foods.size(); i++) {
-//            System.out.println(i + ": " + foods.get(i));
-//        }
-//        if (!scanner.hasNextInt()) {
-//            System.out.println("Invalid input");
-//            scanner.nextLine();
-//            return -1;
-//        }
-//        int index = scanner.nextInt();
-//        scanner.nextLine();
-//        if (index < 0 || index > foods.size()) {
-//            System.out.println("Invalid index");
-//            return -1;
-//        }
-//        return index;
-//    }
-//    private int ListMedkits(List<Item> medkits, Scanner scanner) {
-//        if (medkits.isEmpty()) {
-//            System.out.println("No medkits at the moment");
-//            return -1;
-//        }
-//        System.out.println("Medkits");
-//        for (int i = 0; i < medkits.size(); i++) {
-//            System.out.println(i + ": " + medkits.get(i));
-//        }
-//        if (!scanner.hasNextInt()) {
-//            System.out.println("Invalid input");
-//            scanner.nextLine();
-//            return -1;
-//        }
-//        int index = scanner.nextInt();
-//        scanner.nextLine();
-//        if (index < 0 || index > medkits.size()) {
-//            System.out.println("Invalid index");
-//            return -1;
-//        }
-//        return index;
-//    }
-//    private int ListScrolls(List<Item> scrolls, Scanner scanner) {
-//        if (scrolls.isEmpty()) {
-//            System.out.println("No scrolls at the moment");
-//            return -1;
-//        }
-//        System.out.println("Scrolls");
-//        for (int i = 0; i < scrolls.size(); i++) {
-//            System.out.println(i + ": " + scrolls.get(i));
-//        }
-//        if (!scanner.hasNextInt()) {
-//            System.out.println("Invalid input");
-//            scanner.nextLine();
-//            return -1;
-//        }
-//        int index = scanner.nextInt();
-//        scanner.nextLine();
-//        if (index < 0 || index > scrolls.size()) {
-//            System.out.println("Invalid index");
-//            return -1;
-//        }
-//        return index;
-//    }
 
     public boolean dropItemNear(Character player, Item weapon) {
         Direction[] directions = {

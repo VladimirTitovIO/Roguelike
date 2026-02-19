@@ -12,7 +12,9 @@ import com.roguegame.domain.GameMap.TileType;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.roguegame.domain.DungeonLevel.HEIGHT;
 import static com.roguegame.domain.DungeonLevel.WIDTH;
@@ -22,22 +24,15 @@ public class Controller {
         world = new World();
         Character player = world.getPlayer();
         turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());
+        rebuildMaps();
         player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_SMALL, 0, 0));
         player.getBackpack().addItem(new Item(ItemTypes.Subtype.SWORD, 0, 0));
         player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_SMALL, 0, 0));
 
     }
 
-    public int getEnemiesKilled() {
-        return enemiesKilled;
-    }
-
     public List<Entity> getTurnOrder() {
         return turnOrder;
-    }
-
-    public void setEnemiesKilled(int enemiesKilled) {
-        this.enemiesKilled = enemiesKilled;
     }
 
     public int getFoodUsed() {
@@ -64,21 +59,6 @@ public class Controller {
         this.scrollsUsed = scrollsUsed;
     }
 
-    public int getAttacksLanded() {
-        return attacksLanded;
-    }
-
-    public void setAttacksLanded(int attacksLanded) {
-        this.attacksLanded = attacksLanded;
-    }
-
-    public int getAttacksMissed() {
-        return attacksMissed;
-    }
-
-    public void setAttacksMissed(int attacksMissed) {
-        this.attacksMissed = attacksMissed;
-    }
 
     public int getMovesMade() {
         return movesMade;
@@ -86,6 +66,14 @@ public class Controller {
 
     public void setMovesMade(int movesMade) {
         this.movesMade = movesMade;
+    }
+
+    public int getMedkitsUsed() {
+        return medkitsUsed;
+    }
+
+    public void setMedkitsUsed(int medkitsUsed) {
+        this.medkitsUsed = medkitsUsed;
     }
 
     public enum GameState {
@@ -97,17 +85,18 @@ public class Controller {
         SCOREBOARD_SCREEN
     }
 
-    private int enemiesKilled = 0;
     private int foodUsed = 0;
     private int elixirsUsed = 0;
     private int scrollsUsed = 0;
-    private int attacksLanded = 0;
-    private int attacksMissed = 0;
+    private int medkitsUsed = 0;
     private int movesMade = 0;
     private List<Entity> turnOrder;
     private final World world;
     private GameState currentState = GameState.START_SCREEN;
     private int currentMenuLine = 0;
+    private Map<Position, Enemy> enemyMap;
+    private Map<Position, Item> itemMap;
+
 
     // Инвентарь (временный хардкод)
     private static boolean showingMenu = false;
@@ -164,17 +153,20 @@ public class Controller {
 
     public void enemyTurns() {
         for (Entity e : getTurnOrder()) {
-            if (e instanceof Enemy enemy) {
+            if (e instanceof Enemy enemy && enemy.isAlive()) {
                 enemy = (Enemy) e;
-                if (enemy.getType() == Enemy.Type.GHOST && enemy.isVisible()) enemy.setVisible(false);
+                if (enemy.getType() == Enemy.Type.GHOST && enemy.isInCombat() && !enemy.isVisible()) enemy.setVisible(true);
+                else if (enemy.getType() == Enemy.Type.GHOST && !enemy.isInCombat() && enemy.isVisible()) enemy.setVisible(false);
                 else enemy.setVisible(true);
                 if (enemy.isPlayerNear(getPlayer(), enemy)) {
                     enemy.tryToFollowPlayer(getPlayer(), enemy, getWorld());
                 } else {
+                    enemy.setInCombat(false);
                     enemy.movementPattern(enemy, getWorld());
                 }
             }
         }
+        rebuildMaps();
     }
 
     // Обработка нажатия клавиши в меню
@@ -224,6 +216,8 @@ public class Controller {
                     calculateFOV();
                     updateExplored();
                     setMovesMade(getMovesMade() + 1);
+                    turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());
+                    rebuildMaps();
                 }
 
                 if (c == 'j' || c == 'J') {
@@ -301,6 +295,8 @@ public class Controller {
                             setElixirsUsed(getElixirsUsed() + 1);
                         if (currentMenuItems.get(index).getType() == ItemTypes.Type.SCROLLS)
                             setScrollsUsed(getScrollsUsed() + 1);
+                        if (currentMenuItems.get(index).getType() == ItemTypes.Type.MEDKIT)
+                            setMedkitsUsed(getMedkitsUsed() + 1);
                     }
                     closeMenu();
                 }
@@ -318,6 +314,35 @@ public class Controller {
         showingMenu = false;
         currentMenuType = "";
         currentMenuItems.clear();
+    }
+
+    public void rebuildMaps() {
+        enemyMap = new HashMap<>();
+        for (Enemy e : world.getEnemies()) {
+            enemyMap.put(new Position(e.getPosX(), e.getPosY()), e);
+        }
+        itemMap = new HashMap<>();
+        for (Item i : world.getItems()) {
+            itemMap.put(new Position(i.getPosX(), i.getPosY()), i);
+        }
+        setEnemyMap(enemyMap);
+        setItemMap(itemMap);
+    }
+
+    public void setEnemyMap(Map<Position, Enemy> enemyMap) {
+        this.enemyMap = enemyMap;
+    }
+
+    public void setItemMap(Map<Position, Item> itemMap) {
+        this.itemMap = itemMap;
+    }
+
+    public Map<Position, Enemy> getEnemyMap() {
+        return enemyMap;
+    }
+
+    public Map<Position, Item> getItemMap() {
+        return itemMap;
     }
 
     // Обновляем исследованные клетки при движении

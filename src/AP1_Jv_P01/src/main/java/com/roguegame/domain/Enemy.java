@@ -11,6 +11,7 @@ public class Enemy extends Entity {
     private int hostility;
     private int treasureValue;
     private boolean visible = true;
+    private boolean inCombat = false;
     private static final Random random = new Random();
     private boolean mimicRevealed = false;
 
@@ -27,10 +28,12 @@ public class Enemy extends Entity {
     private static final int HOSTILITY_MEDIUM = 4;
     private static final int HOSTILITY_HIGH = 6;
 
+    public boolean isInCombat() { return inCombat; }
     public boolean isVisible() {
         return visible;
     }
 
+    public void setInCombat(boolean inCombat) { this.inCombat = inCombat; }
     public void setVisible(boolean visible) {
         this.visible = visible;
     }
@@ -224,6 +227,7 @@ public class Enemy extends Entity {
     }
 
     public boolean isPlayerNear(Character player, Enemy monster) {
+        setInCombat(true);
         int distance = Math.abs(player.getPosX() - monster.getPosX());
         distance += Math.abs(player.getPosY() - monster.getPosY());
         boolean playerNear = false;

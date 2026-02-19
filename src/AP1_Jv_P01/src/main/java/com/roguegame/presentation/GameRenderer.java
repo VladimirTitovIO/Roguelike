@@ -113,9 +113,35 @@ public class GameRenderer {
         return null;
     }
 
-    private static void drawItem(TextGraphics g, Item it) {
-        g.setForegroundColor(TextColor.ANSI.MAGENTA);
-        g.setCharacter(it.getPosX(), it.getPosY(), 'I');
+    private static void drawItem(TextGraphics g, Item item) {
+        int x = item.getPosX();
+        int y = item.getPosY();
+        switch (item.getType()) {
+            case WEAPON -> {
+                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setCharacter(x, y, 'w');
+            }
+            case MEDKIT -> {
+                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setCharacter(x, y, 'M');
+            }
+            case ELIXIR -> {
+                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setCharacter(x, y, 'e');
+            }
+            case FOOD -> {
+                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setCharacter(x, y, 'f');
+            }
+            case TREASURE -> {
+                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setCharacter(x, y, '$');
+            }
+            case SCROLLS -> {
+                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setCharacter(x, y, 'S');
+            }
+        }
     }
 
     // обычный тайл
@@ -179,7 +205,7 @@ public class GameRenderer {
      * Отрисовывает игрока на карте.
      */
     public static void renderPlayer(TextGraphics g, int playerX, int playerY) {
-        g.setForegroundColor(TextColor.ANSI.WHITE);
+        g.setForegroundColor(TextColor.ANSI.WHITE_BRIGHT);
         g.setCharacter(playerX, playerY, '@');
     }
 
@@ -207,7 +233,7 @@ public class GameRenderer {
         g.putString(x, y++, "Weapons: " + player.getBackpack().getCount(ItemTypes.Type.WEAPON));
         g.putString(x, y++, "Scrolls: " + player.getBackpack().getCount(ItemTypes.Type.SCROLLS));
         g.putString(x, y++, "Medkits: " + player.getBackpack().getCount(ItemTypes.Type.MEDKIT));
-        g.putString(x, y++, "Treasures: " + player.getBackpack().getCount(ItemTypes.Type.TREASURE));
+        g.putString(x, y, "Treasures: " + player.getBackpack().getCount(ItemTypes.Type.TREASURE));
     }
 
     // --- Вспомогательные методы ---

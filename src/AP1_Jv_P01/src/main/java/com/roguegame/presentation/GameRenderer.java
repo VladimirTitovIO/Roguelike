@@ -37,7 +37,7 @@ public class GameRenderer {
         if (isVisibleNow) {
             drawVisibleTile(g, tile, x, y, controller);
         } else if (isSeen) {
-            drawExploredTile(g, tile, x, y);
+            drawExploredTile(g, tile, x, y, controller);
         } else {
             drawUnexploredTile(g, x, y);
         }
@@ -71,11 +71,11 @@ public class GameRenderer {
                 break;
             case FLOOR:
                 g.setForegroundColor(TextColor.ANSI.GREEN);
-                g.setCharacter(x, y, '.');
+                g.setCharacter(x, y, ' ');
                 break;
             case CORRIDOR:
-                g.setForegroundColor(TextColor.ANSI.YELLOW);
-                g.setCharacter(x, y, '.');
+                g.setForegroundColor(TextColor.ANSI.BLACK);
+                g.setCharacter(x, y, ' ');
                 break;
             case DOOR:
                 renderDoor(g, x, y, controller.getLevel());
@@ -98,10 +98,15 @@ public class GameRenderer {
         }
     }
 
-    private static void drawExploredTile(TextGraphics g, TileType tile, int x, int y) {
+    private static void drawExploredTile(TextGraphics g, TileType tile, int x, int y, Controller controller) {
         if (tile == TileType.WALL) {
             g.setForegroundColor(TextColor.ANSI.WHITE);
             g.setCharacter(x, y, '#');
+        } else if (tile == TileType.FLOOR || tile == TileType.CORRIDOR) {
+            g.setForegroundColor(TextColor.ANSI.GREEN);
+            g.setCharacter(x, y, '.');
+        } else if (tile == TileType.DOOR) {
+            renderDoor(g, x, y, controller.getLevel());
         } else {
             g.setForegroundColor(TextColor.ANSI.BLACK);
             g.setCharacter(x, y, ' ');

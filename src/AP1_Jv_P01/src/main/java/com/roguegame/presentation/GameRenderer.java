@@ -43,46 +43,94 @@ public class GameRenderer {
         }
     }
 
-    private static void drawVisibleTile(TextGraphics g, TileType tile, int x, int y, Controller controller) {
-        DungeonLevel.Position exit = controller.getLevel().getExitPosition();
-        if (exit.x == x && exit.y == y) {
-            g.setForegroundColor(TextColor.ANSI.CYAN);
-            g.setCharacter(x, y, 'E');
+    private static void drawVisibleTile(TextGraphics g, TileType tile,
+                                        int x, int y, Controller controller) {
+        if (isExitHere(controller, x, y)) {
+            drawExit(g, x, y);
             return;
         }
+
+        Enemy enemy = findEnemy(controller, x, y);
+        if (enemy != null) {
+            drawEnemy(g, enemy);
+            return;
+        }
+
+        Item item = findItem(controller, x, y);
+        if (item != null) {
+            drawItem(g, item);
+            return;
+        }
+
+        drawTile(g, tile, x, y, controller);
+    }
+
+    // выход
+    private static boolean isExitHere(Controller controller, int x, int y) {
+        Position exit = controller.getLevel().getExitPosition();
+        return exit.x == x && exit.y == y;
+    }
+
+    private static void drawExit(TextGraphics g, int x, int y) {
+        g.setForegroundColor(TextColor.ANSI.CYAN);
+        g.setCharacter(x, y, 'E');
+    }
+
+    // враг
+    private static Enemy findEnemy(Controller controller, int x, int y) {
         for (Enemy e : controller.getWorld().getEnemies()) {
             if (e.getPosX() == x && e.getPosY() == y && e.isVisible()) {
-                g.setForegroundColor(TextColor.ANSI.RED);
-                g.setCharacter(x, y, 'O');
-                return;
+                return e;
             }
         }
+        return null;
+    }
+
+    private static void drawEnemy(TextGraphics g, Enemy e) {
+        TextColor color = switch (e.getType()) {
+            case OGRE -> TextColor.ANSI.YELLOW;
+            case ZOMBIE -> TextColor.ANSI.GREEN;
+            case VAMPIRE -> TextColor.ANSI.RED;
+            default -> TextColor.ANSI.WHITE;
+        };
+        char ch = switch (e.getType()) {
+            case OGRE -> 'O';
+            case ZOMBIE -> 'z';
+            case VAMPIRE -> 'v';
+            case GHOST -> 'g';
+            case SNAKE_MAGE -> 's';
+            case MIMIC -> 'm';
+        };
+        g.setForegroundColor(color);
+        g.setCharacter(e.getPosX(), e.getPosY(), ch);
+    }
+
+    // предмет
+    private static Item findItem(Controller controller, int x, int y) {
         for (Item i : controller.getWorld().getItems()) {
-            if (i.getPosX() == x && i.getPosY() == y) {
-                g.setForegroundColor(TextColor.ANSI.MAGENTA);
-                g.setCharacter(x, y, 'I');
-                return;
-            }
+            if (i.getPosX() == x && i.getPosY() == y) return i;
         }
+        return null;
+    }
+
+    private static void drawItem(TextGraphics g, Item it) {
+        g.setForegroundColor(TextColor.ANSI.MAGENTA);
+        g.setCharacter(it.getPosX(), it.getPosY(), 'I');
+    }
+
+    // обычный тайл
+    private static void drawTile(TextGraphics g, TileType tile,
+                                 int x, int y, Controller controller) {
         switch (tile) {
-            case WALL:
+            case WALL -> {
                 g.setForegroundColor(TextColor.ANSI.WHITE);
                 g.setCharacter(x, y, '#');
-                break;
-            case FLOOR:
-                g.setForegroundColor(TextColor.ANSI.GREEN);
-                g.setCharacter(x, y, ' ');
-                break;
-            case CORRIDOR:
+            }
+            case FLOOR, CORRIDOR -> {
                 g.setForegroundColor(TextColor.ANSI.BLACK);
                 g.setCharacter(x, y, ' ');
-                break;
-            case DOOR:
-                renderDoor(g, x, y, controller.getLevel());
-                break;
-            default:
-                g.setForegroundColor(TextColor.ANSI.WHITE);
-                g.setCharacter(x, y, '?');
+            }
+            case DOOR -> renderDoor(g, x, y, controller.getLevel());
         }
     }
 

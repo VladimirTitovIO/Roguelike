@@ -118,27 +118,27 @@ public class GameRenderer {
         int y = item.getPosY();
         switch (item.getType()) {
             case WEAPON -> {
-                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setForegroundColor(TextColor.ANSI.BLUE);
                 g.setCharacter(x, y, 'w');
             }
             case MEDKIT -> {
-                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setForegroundColor(TextColor.ANSI.CYAN);
                 g.setCharacter(x, y, 'M');
             }
             case ELIXIR -> {
-                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setForegroundColor(TextColor.ANSI.GREEN);
                 g.setCharacter(x, y, 'e');
             }
             case FOOD -> {
-                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setForegroundColor(TextColor.ANSI.RED);
                 g.setCharacter(x, y, 'f');
             }
             case TREASURE -> {
-                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setForegroundColor(TextColor.ANSI.YELLOW);
                 g.setCharacter(x, y, '$');
             }
             case SCROLLS -> {
-                g.setForegroundColor(TextColor.ANSI.MAGENTA);
+                g.setForegroundColor(TextColor.ANSI.BLUE);
                 g.setCharacter(x, y, 'S');
             }
         }

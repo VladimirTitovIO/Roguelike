@@ -6,8 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="5b3f254e-efca-4156-a8ec-5016c75f3a67" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/ItemTypes.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/ItemTypes.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/LevelGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/LevelGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Character.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Character.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Combat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Combat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Enemy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Enemy.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/Controller.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/GameRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/GameRenderer.java" afterDir="false" />
@@ -71,40 +73,40 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Character.executor": "Run",
-    "Application.Presentation.executor": "Run",
-    "Application.topotun.executor": "Run",
-    "Gradle.AP1_Jv_P01 [:Domain.Character.main()].executor": "Run",
-    "Gradle.AP1_Jv_P01 [:Domain.MapTest.main()].executor": "Run",
-    "Gradle.AP1_Jv_P01 [:com.roguegame.domain.MapTest.main()].executor": "Run",
-    "Gradle.AP1_Jv_P01 [:domain.MapTest.main()].executor": "Run",
-    "Gradle.AP1_Jv_P01.ID_1364934-Team_TL_ingleavg.b8c19b04_e202_490f-1 [:Domain.Character.main()].executor": "Run",
-    "Gradle.AP1_Jv_P01.ID_1364934-Team_TL_ingleavg.b8c19b04_e202_490f-1 [compileJava].executor": "Run",
-    "Gradle.Build AP1_Jv_P01.ID_1364934-Team_TL_ingleavg.b8c19b04_e202_490f-1.executor": "Run",
-    "Gradle.Build AP1_Jv_P01.executor": "Run",
-    "Gradle.Domain [:Domain.Character.main()].executor": "Run",
-    "Gradle.Download Sources.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "yolanmar1",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Character.executor&quot;: &quot;Run&quot;,
+    &quot;Application.Presentation.executor&quot;: &quot;Run&quot;,
+    &quot;Application.topotun.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AP1_Jv_P01 [:Domain.Character.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AP1_Jv_P01 [:Domain.MapTest.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AP1_Jv_P01 [:com.roguegame.domain.MapTest.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AP1_Jv_P01 [:domain.MapTest.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AP1_Jv_P01.ID_1364934-Team_TL_ingleavg.b8c19b04_e202_490f-1 [:Domain.Character.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AP1_Jv_P01.ID_1364934-Team_TL_ingleavg.b8c19b04_e202_490f-1 [compileJava].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build AP1_Jv_P01.ID_1364934-Team_TL_ingleavg.b8c19b04_e202_490f-1.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Build AP1_Jv_P01.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Domain [:Domain.Character.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;yolanmar1&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\ctulh\OneDrive\Desktop\AP1_Jv_P01.ID_1364934-Team_TL_ingleavg.b8c19b04_e202_490f-1\src\AP1_Jv_P01\src" />
@@ -163,7 +165,8 @@
       <workItem from="1771144721349" duration="8123000" />
       <workItem from="1771218820143" duration="18375000" />
       <workItem from="1771314018080" duration="31517000" />
-      <workItem from="1771404664459" duration="20182000" />
+      <workItem from="1771404664459" duration="21867000" />
+      <workItem from="1771488332645" duration="15381000" />
     </task>
     <servers />
   </component>
@@ -182,15 +185,6 @@
     </option>
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/Presentation.java</url>
-          <line>104</line>
-          <option name="timeStamp" value="26" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <pin-to-top-manager>
       <pinned-members>
         <PinnedItemInfo parentTag="Domain.Backpack" memberName="items" />

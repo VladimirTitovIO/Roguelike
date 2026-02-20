@@ -263,6 +263,10 @@ public class Controller {
 
         if (key.getKeyType() == KeyType.Character) {
             char c = key.getCharacter();
+            if (c == '0') {
+                closeMenu();
+                return;
+            }
             if (c >= '1' && c <= '9') {
                 int index = c - '1';
                 if (index < currentMenuItems.size()) {

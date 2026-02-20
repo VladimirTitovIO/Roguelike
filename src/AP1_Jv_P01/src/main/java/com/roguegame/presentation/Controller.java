@@ -104,11 +104,6 @@ public class Controller {
     private List<Item> currentMenuItems = new ArrayList<>();
     //private static LeaderboardService leaderboardService = new FileLeaderboardService(); // Реализация разработчика А
 
-    // НОВЫЕ ПОЛЯ
-    //private static final int LEVEL_WIDTH = DungeonLevel.WIDTH; // Ширина уровня
-    //private static final int LEVEL_HEIGHT = DungeonLevel.HEIGHT; // Высота уровня
-    public static final int VIEW_RADIUS = 7; // Радиус видимости
-
     // Исследованные клетки (для тумана войны)
     private boolean[][] explored = new boolean[WIDTH][HEIGHT];
 
@@ -155,8 +150,10 @@ public class Controller {
         for (Entity e : getTurnOrder()) {
             if (e instanceof Enemy enemy && enemy.isAlive()) {
                 enemy = (Enemy) e;
-                if (enemy.getType() == Enemy.Type.GHOST && enemy.isInCombat() && !enemy.isVisible()) enemy.setVisible(true);
-                else if (enemy.getType() == Enemy.Type.GHOST && !enemy.isInCombat() && enemy.isVisible()) enemy.setVisible(false);
+                if (enemy.getType() == Enemy.Type.GHOST && enemy.isInCombat() && !enemy.isVisible())
+                    enemy.setVisible(true);
+                else if (enemy.getType() == Enemy.Type.GHOST && !enemy.isInCombat() && enemy.isVisible())
+                    enemy.setVisible(false);
                 else enemy.setVisible(true);
                 if (enemy.isPlayerNear(getPlayer(), enemy)) {
                     enemy.tryToFollowPlayer(getPlayer(), enemy, getWorld());
@@ -246,19 +243,13 @@ public class Controller {
                 }
                 break;
         }
-        // Проверка на переход на следующий уровень
+        // Переход на следующий уровень
         if (world.getPlayer().getPosX() == world.getLevel().getExitPosition().x &&
                 world.getPlayer().getPosY() == world.getLevel().getExitPosition().y) {
             ScreenManager.showMessage(screen, "You found the exit! Next level!");
-//            currentState = GameState.ENDGAME_SCREEN; // уточнить !!!
             world.initNewLevel();
             resetGame();
         }
-
-//        // Проверка на смерть (для теста)
-//        if (world.getPlayer().getPosX() == world.getPlayer().getPosY() /*8 && playerY == 8*/) {
-//            currentState = GameState.DEAD_SCREEN;
-//        }
     }
 
     // Обработка выбора предмета из рюкзака
@@ -379,7 +370,7 @@ public class Controller {
     private final boolean[][] currentFOV = new boolean[WIDTH][HEIGHT];
 
     // Максимальная дистанция видимости (можно настроить)
-    private static final int MAX_FOV_DISTANCE = 15;
+    private static final int MAX_FOV_DISTANCE = 25;
 
     // Рассчитываем FOV с помощью Bresenham
     public void calculateFOV() {
@@ -426,9 +417,13 @@ public class Controller {
             // Отмечаем эту клетку как видимую
             currentFOV[x0][y0] = true;
 
-            // Если встретили стену — прекращаем луч
-            if (world.getLevel().getTile(x0, y0) == TileType.WALL) {
-                break;
+            // Проверяем, прозрачна ли эта клетка, и стоит ли на ней игрок
+            TileType tile = world.getLevel().getTile(x0, y0);
+            boolean isPlayerTile = (x0 == world.getPlayer().getPosX() && y0 == world.getPlayer().getPosY());
+
+            // Если это непрозрачный тайл и не дверь, на которой стоит игрок — луч останавливается
+            if (tile == TileType.WALL || (tile == TileType.DOOR && !isPlayerTile)) {
+                break; // Останавливаем луч здесь
             }
 
             // Если достигли цели — выходим

@@ -72,6 +72,8 @@ public class World {
     public void initNewLevel() {
         level = new DungeonLevel();
         setLevel(level);
+        player.setPosX(level.getStartPosition().x);
+        player.setPosY(level.getStartPosition().y);
         if (!player.isAlive()) {
             player = new Character(level.getStartPosition().x, level.getStartPosition().y);
             player.setAlive(true);

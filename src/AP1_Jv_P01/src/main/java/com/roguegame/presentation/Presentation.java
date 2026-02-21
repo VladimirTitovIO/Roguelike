@@ -121,10 +121,11 @@ public class Presentation {
                     controller.setCurrentState(Controller.GameState.DEAD_SCREEN);
                 }
             }
-            if (controller.getWorld().getLevelNumber() >= 20) {
+            if (controller.getWorld().getLevelNumber() >= 21) {
                 controller.onRunEnded();
                 controller.setCurrentState(Controller.GameState.ENDGAME_SCREEN);
             }
+            player.tickBuffs();
         }
     }
 

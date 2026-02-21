@@ -6,13 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="5b3f254e-efca-4156-a8ec-5016c75f3a67" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Character.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Character.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Combat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Combat.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Enemy.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/Enemy.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/copyPresentation/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/copyPresentation/Controller.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/World.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/domain/World.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/GameRenderer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/GameRenderer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/Presentation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/AP1_Jv_P01/src/main/java/com/roguegame/presentation/Presentation.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -166,7 +162,8 @@
       <workItem from="1771218820143" duration="18375000" />
       <workItem from="1771314018080" duration="31517000" />
       <workItem from="1771404664459" duration="21867000" />
-      <workItem from="1771488332645" duration="15381000" />
+      <workItem from="1771488332645" duration="18774000" />
+      <workItem from="1771601031022" duration="1081000" />
     </task>
     <servers />
   </component>

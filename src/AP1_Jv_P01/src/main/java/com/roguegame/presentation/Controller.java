@@ -8,7 +8,9 @@ import com.roguegame.domain.*;
 import com.roguegame.domain.Character;
 import com.roguegame.domain.DungeonLevel.Position;
 import com.roguegame.domain.GameMap.TileType;
-//import domain.LeaderboardService;
+import com.roguegame.domain.LeaderboardService;
+import com.roguegame.domain.ScoreEntry;
+import com.roguegame.datalayer.JsonLeaderboardService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -104,11 +106,6 @@ public class Controller {
     private List<Item> currentMenuItems = new ArrayList<>();
     //private static LeaderboardService leaderboardService = new FileLeaderboardService(); // Реализация разработчика А
 
-    // НОВЫЕ ПОЛЯ
-    //private static final int LEVEL_WIDTH = DungeonLevel.WIDTH; // Ширина уровня
-    //private static final int LEVEL_HEIGHT = DungeonLevel.HEIGHT; // Высота уровня
-    public static final int VIEW_RADIUS = 7; // Радиус видимости
-
     // Исследованные клетки (для тумана войны)
     private boolean[][] explored = new boolean[WIDTH][HEIGHT];
 
@@ -155,8 +152,10 @@ public class Controller {
         for (Entity e : getTurnOrder()) {
             if (e instanceof Enemy enemy && enemy.isAlive()) {
                 enemy = (Enemy) e;
-                if (enemy.getType() == Enemy.Type.GHOST && enemy.isInCombat() && !enemy.isVisible()) enemy.setVisible(true);
-                else if (enemy.getType() == Enemy.Type.GHOST && !enemy.isInCombat() && enemy.isVisible()) enemy.setVisible(false);
+                if (enemy.getType() == Enemy.Type.GHOST && enemy.isInCombat() && !enemy.isVisible())
+                    enemy.setVisible(true);
+                else if (enemy.getType() == Enemy.Type.GHOST && !enemy.isInCombat() && enemy.isVisible())
+                    enemy.setVisible(false);
                 else enemy.setVisible(true);
                 if (enemy.isPlayerNear(getPlayer(), enemy)) {
                     enemy.tryToFollowPlayer(getPlayer(), enemy, getWorld());
@@ -179,6 +178,8 @@ public class Controller {
             }
         } else if (key.getKeyType() == KeyType.Enter) {
             if (currentMenuLine == 0) { // NEW GAME
+                // фиксируем предыдущую попытку в лидерборде (если она была)
+                saveCurrentRunToLeaderboardIfNeeded();
                 currentState = GameState.GAME_SCREEN;
                 if (!world.getPlayer().isAlive()) {
                     world.initNewLevel();
@@ -246,20 +247,14 @@ public class Controller {
                 }
                 break;
         }
-        // Проверка на переход на следующий уровень
+        // Переход на следующий уровень
         if (world.getPlayer().getPosX() == world.getLevel().getExitPosition().x &&
                 world.getPlayer().getPosY() == world.getLevel().getExitPosition().y) {
             ScreenManager.showMessage(screen, "You found the exit! Next level!");
-//            currentState = GameState.ENDGAME_SCREEN; // уточнить !!!
             world.initNewLevel();
             world.setLevelNumber(world.getLevelNumber() + 1);
             resetGame();
         }
-
-//        // Проверка на смерть (для теста)
-//        if (world.getPlayer().getPosX() == world.getPlayer().getPosY() /*8 && playerY == 8*/) {
-//            currentState = GameState.DEAD_SCREEN;
-//        }
     }
 
     // Обработка выбора предмета из рюкзака
@@ -273,6 +268,10 @@ public class Controller {
 
         if (key.getKeyType() == KeyType.Character) {
             char c = key.getCharacter();
+            if (c == '0') {
+                closeMenu();
+                return;
+            }
             if (c >= '1' && c <= '9') {
                 int index = c - '1';
                 if (index < currentMenuItems.size()) {
@@ -380,7 +379,7 @@ public class Controller {
     private final boolean[][] currentFOV = new boolean[WIDTH][HEIGHT];
 
     // Максимальная дистанция видимости (можно настроить)
-    private static final int MAX_FOV_DISTANCE = 15;
+    private static final int MAX_FOV_DISTANCE = 25;
 
     // Рассчитываем FOV с помощью Bresenham
     public void calculateFOV() {
@@ -427,9 +426,13 @@ public class Controller {
             // Отмечаем эту клетку как видимую
             currentFOV[x0][y0] = true;
 
-            // Если встретили стену — прекращаем луч
-            if (world.getLevel().getTile(x0, y0) == TileType.WALL) {
-                break;
+            // Проверяем, прозрачна ли эта клетка, и стоит ли на ней игрок
+            TileType tile = world.getLevel().getTile(x0, y0);
+            boolean isPlayerTile = (x0 == world.getPlayer().getPosX() && y0 == world.getPlayer().getPosY());
+
+            // Если это непрозрачный тайл и не дверь, на которой стоит игрок — луч останавливается
+            if (tile == TileType.WALL || (tile == TileType.DOOR && !isPlayerTile)) {
+                break; // Останавливаем луч здесь
             }
 
             // Если достигли цели — выходим
@@ -484,5 +487,41 @@ public class Controller {
 
     public boolean isExplored(int x, int y) {
         return explored[x][y];
+    }
+    private final LeaderboardService leaderboardService = new JsonLeaderboardService();
+    private boolean runSaved = false;
+    public List<ScoreEntry> loadLeaderboard() {
+        List<ScoreEntry> scores = new ArrayList<>(leaderboardService.loadLeaderboard());
+        scores.sort((a, b) -> {
+            if (b.getTreasures() != a.getTreasures()) return Integer.compare(b.getTreasures(), a.getTreasures());
+            return Integer.compare(b.getLevel(), a.getLevel());
+        });
+        return scores;
+    }
+
+    /** Сохранить текущую попытку в таблицу лидеров (если попытка не пустая). */
+    public void saveCurrentRunToLeaderboardIfNeeded() {
+        Character player = world.getPlayer();
+        int lvl = world.getLevelNumber();
+
+        boolean hasProgress = player.getGold() > 0
+                || lvl > 1
+                || player.getEnemiesKilled() > 0
+                || foodUsed > 0 || elixirsUsed > 0 || scrollsUsed > 0 || movesMade > 0;
+
+        if (!hasProgress) return;
+
+        ScoreEntry entry = new ScoreEntry(
+                player.getGold(),
+                lvl,
+                player.getEnemiesKilled(),
+                foodUsed,
+                elixirsUsed,
+                scrollsUsed,
+                player.getAttacksLanded(),
+                player.getAttacksMissed(),
+                movesMade
+        );
+        leaderboardService.saveScore(entry);
     }
 }

@@ -161,7 +161,7 @@ public class ScreenManager {
         try {
             TextGraphics g = screen.newTextGraphics();
             g.setForegroundColor(TextColor.ANSI.YELLOW);
-            g.putString(0, LEVEL_HEIGHT + 5, message);
+            g.putString(40, LEVEL_HEIGHT + 5, message);
             screen.refresh();
             Thread.sleep(1500);
         } catch (Exception e) {
@@ -254,7 +254,7 @@ public class ScreenManager {
             g.putString(menuX, menuY + i + 1, (i + 1) + ". " + currentMenuItems.get(i));
         }
         g.putString(menuX, menuY + currentMenuItems.size() + 2,
-                "Press 1-" + currentMenuItems.size() + " or ESC to cancel");
+                "Press 0-" + currentMenuItems.size() + " or ESC to cancel");
     }
 
     // описываем арт-набор для каждого типа сообщений

@@ -89,16 +89,7 @@ public class Presentation {
                     );
                     break;
                 case SCOREBOARD_SCREEN:
-                    //List<ScoreEntry> scores = DataLayer.loadLeaderboard(); // Это должен сделать разработчик А
-                    //ScreenManager.scoreboardScreen(screen, scores);
-                    //List<ScoreEntry> scores = leaderboardService.loadLeaderboard();
-                    //ScreenManager.scoreboardScreen(screen, scores);
-                    List<ScoreEntry> scores = new ArrayList<>();
-                    scores.add(new ScoreEntry(player.getGold(), controller.getWorld().getLevelNumber(),
-                            controller.getPlayer().getEnemiesKilled(), controller.getFoodUsed(),
-                            controller.getElixirsUsed(), controller.getScrollsUsed(),
-                            controller.getPlayer().getAttacksLanded(), controller.getPlayer().getAttacksMissed(),
-                            controller.getMovesMade()));
+                    List<ScoreEntry> scores = controller.loadLeaderboard();
                     ScreenManager.renderScoreboardScreen(screen, scores);
                     break;
                 case DEAD_SCREEN:

@@ -519,24 +519,45 @@ public class Controller {
         Character player = world.getPlayer();
         int lvl = world.getLevelNumber();
 
+        // Считаем предметы В РЮКЗАКЕ, а не "использовано"
+        int foodInBag = (int) player.getBackpack().getItems().stream()
+                .filter(i -> i.getType().equals(ItemTypes.Type.FOOD))
+                .count();
+
+        int elixirsInBag = (int) player.getBackpack().getItems().stream()
+                .filter(i -> i.getType().equals(ItemTypes.Type.ELIXIR))
+                .count();
+
+        int scrollsInBag = (int) player.getBackpack().getItems().stream()
+                .filter(i -> i.getType().equals(ItemTypes.Type.SCROLLS))
+                .count();
+
+
+        // ВАЖНО: не используем "инвентарь" в hasProgress, потому что стартовые предметы есть всегда
         boolean hasProgress = player.getGold() > 0
                 || lvl > 1
                 || player.getEnemiesKilled() > 0
-                || foodUsed > 0 || elixirsUsed > 0 || scrollsUsed > 0 || movesMade > 0;
+                || movesMade > 0
+                || player.getAttacksLanded() > 0
+                || player.getAttacksMissed() > 0;
 
         if (!hasProgress) return;
 
+        // ⚠️ Treasures:
+        // Если хочешь, чтобы в колонке Treasures было как в Backpack (штучки), ставим treasuresInBag.
+        // Если хочешь, чтобы там был Gold (как раньше) — замени treasuresInBag на player.getGold().
         ScoreEntry entry = new ScoreEntry(
                 player.getGold(),
                 lvl,
                 player.getEnemiesKilled(),
-                foodUsed,
-                elixirsUsed,
-                scrollsUsed,
+                foodInBag,
+                elixirsInBag,
+                scrollsInBag,
                 player.getAttacksLanded(),
                 player.getAttacksMissed(),
                 movesMade
         );
+
         leaderboardService.saveScore(entry);
     }
 }

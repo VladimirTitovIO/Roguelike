@@ -250,13 +250,18 @@ public class ScreenManager {
 
         g.setBackgroundColor(TextColor.ANSI.BLACK);
         g.setForegroundColor(TextColor.ANSI.WHITE);
-        g.putString(menuX, menuY, "=== " + currentMenuType.toUpperCase() + " ===");
+        g.putString(menuX, menuY++, "=== " + currentMenuType.toUpperCase() + " ===");
 
         for (int i = 0; i < currentMenuItems.size(); i++) {
-            g.putString(menuX, menuY + i + 1, (i + 1) + ". " + currentMenuItems.get(i));
+            g.putString(menuX, menuY++, (i + 1) + ". " + currentMenuItems.get(i));
         }
-        g.putString(menuX, menuY + currentMenuItems.size() + 2,
-                "Press 0-" + currentMenuItems.size() + " or ESC to cancel");
+        String hint;
+        if (currentMenuItems.isEmpty()) {
+            hint = "You have no " + currentMenuType.toUpperCase() + ". Press ESC to cancel.";
+        } else {
+            hint = "Press 1-" + currentMenuItems.size() + " or ESC to cancel.";
+        }
+        g.putString(menuX, menuY, hint);
     }
 
     // описываем арт-набор для каждого типа сообщений

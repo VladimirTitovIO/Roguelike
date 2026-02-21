@@ -104,7 +104,7 @@ public class GameRenderer {
         int y = item.getPosY();
         switch (item.getType()) {
             case WEAPON -> {
-                g.setForegroundColor(TextColor.ANSI.BLUE);
+                g.setForegroundColor(TextColor.ANSI.BLUE_BRIGHT);
                 g.setCharacter(x, y, 'w');
             }
             case MEDKIT -> {
@@ -124,7 +124,7 @@ public class GameRenderer {
                 g.setCharacter(x, y, '$');
             }
             case SCROLLS -> {
-                g.setForegroundColor(TextColor.ANSI.BLUE);
+                g.setForegroundColor(TextColor.ANSI.BLUE_BRIGHT);
                 g.setCharacter(x, y, 'S');
             }
         }

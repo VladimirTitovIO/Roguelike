@@ -28,12 +28,20 @@ public class JsonLeaderboardService implements LeaderboardService {
     private final Path filePath;
 
     public JsonLeaderboardService() {
-        Path dir = Paths.get(System.getProperty("user.home"), ".roguegame");
-        this.filePath = dir.resolve(FILE_NAME);
+
+        // Текущая директория запуска
+        Path projectRoot = Paths.get(System.getProperty("user.dir"));
+
+        // Путь внутрь src/AP1_Jv_P01
+        Path dir = projectRoot
+                .resolve("src")
+                .resolve("AP1_Jv_P01");
+
         try {
             Files.createDirectories(dir);
-        } catch (IOException ignored) {
-        }
+        } catch (IOException ignored) {}
+
+        this.filePath = dir.resolve(FILE_NAME);
     }
 
     @Override

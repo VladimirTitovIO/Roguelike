@@ -117,10 +117,12 @@ public class Presentation {
             if (controller.getCurrentState() == Controller.GameState.GAME_SCREEN) {
                 controller.enemyTurns();
                 if (!controller.getPlayer().isAlive()) {
+                    controller.onRunEnded();
                     controller.setCurrentState(Controller.GameState.DEAD_SCREEN);
                 }
             }
             if (controller.getWorld().getLevelNumber() >= 20) {
+                controller.onRunEnded();
                 controller.setCurrentState(Controller.GameState.ENDGAME_SCREEN);
             }
         }

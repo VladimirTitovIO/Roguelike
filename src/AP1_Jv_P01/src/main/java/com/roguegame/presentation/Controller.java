@@ -178,8 +178,6 @@ public class Controller {
             }
         } else if (key.getKeyType() == KeyType.Enter) {
             if (currentMenuLine == 0) { // NEW GAME
-                // фиксируем предыдущую попытку в лидерборде (если она была)
-                saveCurrentRunToLeaderboardIfNeeded();
                 currentState = GameState.GAME_SCREEN;
                 if (!world.getPlayer().isAlive()) {
                     world.initNewLevel();
@@ -359,6 +357,12 @@ public class Controller {
 
     // Сброс исследованных клеток при новой игре
     private void resetGame() {
+        // Сброс статистики попытки и флага сохранения
+        runSaved = false;
+        foodUsed = 0;
+        elixirsUsed = 0;
+        scrollsUsed = 0;
+        movesMade = 0;
         Character player = world.getPlayer();
 //        world.setLevelNumber(1);
         turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());
@@ -490,6 +494,17 @@ public class Controller {
     }
     private final LeaderboardService leaderboardService = new JsonLeaderboardService();
     private boolean runSaved = false;
+
+    /**
+     * Сохраняет текущую попытку в лидерборд ОДИН РАЗ.
+     * Вызывай из Presentation в момент смерти или победы (перед переключением экрана).
+     */
+    public void onRunEnded() {
+        if (runSaved) return;
+        runSaved = true;
+        saveCurrentRunToLeaderboardIfNeeded();
+    }
+
     public List<ScoreEntry> loadLeaderboard() {
         List<ScoreEntry> scores = new ArrayList<>(leaderboardService.loadLeaderboard());
         scores.sort((a, b) -> {

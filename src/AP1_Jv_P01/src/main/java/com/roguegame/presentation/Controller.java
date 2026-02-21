@@ -152,6 +152,9 @@ public class Controller {
         for (Entity e : getTurnOrder()) {
             if (e instanceof Enemy enemy && enemy.isAlive()) {
                 enemy = (Enemy) e;
+                if (e.getCombatResult() != null) {
+                    e.setCombatResult(null);
+                }
                 if (enemy.getType() == Enemy.Type.GHOST && enemy.isInCombat() && !enemy.isVisible())
                     enemy.setVisible(true);
                 else if (enemy.getType() == Enemy.Type.GHOST && !enemy.isInCombat() && enemy.isVisible())
@@ -196,6 +199,9 @@ public class Controller {
     // Обработка нажатия клавиш в игре
     private void handleGameInput(KeyStroke key, Screen screen) {
         Character player = world.getPlayer();
+        if (player.getCombatResult() != null) {
+            player.setCombatResult(null);
+        }
         boolean moved = false;
         if (showingMenu) { // меню выбора предметов из рюкзака
             handleMenuInput(key, screen);

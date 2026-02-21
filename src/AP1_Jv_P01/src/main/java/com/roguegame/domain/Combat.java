@@ -91,9 +91,11 @@ public class Combat {
     }
 
     public void attack(Character player, Enemy monster, TurnManager currentTurn) {
+        int damage = 0;
         if (currentTurn.getCurrentTurn().equals(Turn.PLAYER)) {
-            if (checkIfHit(player, monster, currentTurn.getCurrentTurn())) {
-                int damage = calculatePlayerDamage(player, monster);
+            boolean hit = checkIfHit(player, monster, currentTurn.getCurrentTurn());
+            if (hit) {
+                damage = calculatePlayerDamage(player, monster);
                 monster.setHealth(monster.getHealth() - damage);
                 player.setAttacksLanded(player.getAttacksLanded() + 1);
             } else {
@@ -102,35 +104,23 @@ public class Combat {
             if (monster.getHealth() <= 0) {
                 player.setGold(monster.getType().getValue() + player.getGold());
             }
+            player.setCombatResult(new CombatResult("Player", monster.getType().name(), damage, hit));
         } else {
-            int damage = 0;
-            if (checkIfHit(player, monster, currentTurn.getCurrentTurn()))
+            boolean hit = checkIfHit(player, monster, currentTurn.getCurrentTurn());
+            if (hit) {
                 switch (monster.getType()) {
-                    case OGRE:
-                        damage = calculateOgreDamage(monster);
-                        player.setHealth(player.getHealth() - damage);
-                        break;
-                    case VAMPIRE:
-                        damage = calculateVampireDamage(monster, player);
-                        player.setHealth(player.getHealth() - damage);
-                        break;
-                    case SNAKE_MAGE:
-                        damage = calculateSnakeMageDamage(monster);
-                        player.setHealth(player.getHealth() - damage);
-                        break;
-                    case ZOMBIE:
-                    case GHOST:
-                        damage = calculateZombieGhostDamage(monster);
-                        player.setHealth(player.getHealth() - damage);
-                        break;
-                    case MIMIC:
-                        damage = calculateMimicDamage(monster);
-                        player.setHealth(player.getHealth() - damage);
-                        break;
+                    case OGRE -> damage = calculateOgreDamage(monster);
+                    case VAMPIRE -> damage = calculateVampireDamage(monster, player);
+                    case SNAKE_MAGE -> damage = calculateSnakeMageDamage(monster);
+                    case ZOMBIE, GHOST -> damage = calculateZombieGhostDamage(monster);
+                    case MIMIC -> damage = calculateMimicDamage(monster);
                 }
+                player.setHealth(player.getHealth() - damage);
+            }
             if (player.getHealth() <= 0) {
                 player.setAlive(false);
             }
+            monster.setCombatResult(new CombatResult(monster.getType().name(), "Player", damage, hit));
         }
     }
 }

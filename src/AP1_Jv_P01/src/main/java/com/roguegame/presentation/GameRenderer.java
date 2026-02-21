@@ -222,6 +222,29 @@ public class GameRenderer {
         g.putString(x, y, "Treasures: " + player.getBackpack().getCount(ItemTypes.Type.TREASURE));
     }
 
+    public static void renderPlayerCombatLog(TextGraphics g, Controller controller) {
+        int x = LEVEL_WIDTH + 2;
+        int y = 15;
+        g.setForegroundColor(TextColor.ANSI.GREEN);
+        g.putString(x, y++, "=====COMBAT LOG=====");
+        g.setForegroundColor(TextColor.ANSI.WHITE);
+        if (controller.getPlayer().getCombatResult() != null) {
+            g.putString(x, y++, controller.getPlayer().getCombatResult().toString());
+        }
+    }
+
+    public static void renderEnemyCombatLog(TextGraphics g, Controller controller) {
+        int x = LEVEL_WIDTH + 2;
+        int y = 17;
+        g.setForegroundColor(TextColor.ANSI.GREEN);
+        g.setForegroundColor(TextColor.ANSI.WHITE);
+        for (Enemy e : controller.getWorld().getEnemies()) {
+            if (e.getCombatResult() != null) {
+                g.putString(x, y++, e.getCombatResult().toString());
+            }
+        }
+    }
+
     // --- Вспомогательные методы ---
 
     private static TextColor getDoorColor(DoorColor color) {

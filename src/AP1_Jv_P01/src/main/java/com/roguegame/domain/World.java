@@ -147,7 +147,7 @@ public class World {
     private void handleCombat(Character player, Enemy enemy) {
         Combat c = new Combat();
         TurnManager playerTurn = new TurnManager(TurnManager.Turn.PLAYER);
-        c.attack(player, enemy, playerTurn);
+         c.attack(player, enemy, playerTurn);
         if (enemy.getHealth() <= 0) {
            enemy.setAlive(false);
            player.setEnemiesKilled(player.getEnemiesKilled() + 1);

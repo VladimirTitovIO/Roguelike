@@ -9,6 +9,15 @@ public abstract class Entity {
     private int agility;
     public boolean alive = true;
     public boolean playerAsleep = false;
+    public CombatResult combatResult;
+
+    public void setCombatResult(CombatResult combatResult) {
+        this.combatResult = combatResult;
+    }
+
+    public CombatResult getCombatResult() {
+        return combatResult;
+    }
 
     public boolean isAlive() {
         return alive;

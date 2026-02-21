@@ -70,7 +70,7 @@ public class Presentation {
         Controller controller = new Controller();
         Character player = controller.getPlayer();
 
-        while (controller.getWorld().getLevelNumber() < 20) {
+        while (controller.getWorld().getLevelNumber() < 21) {
             // Рендерим текущее состояние
             switch (controller.getCurrentState()) {
                 case START_SCREEN:

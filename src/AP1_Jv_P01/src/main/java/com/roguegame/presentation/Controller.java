@@ -252,6 +252,7 @@ public class Controller {
             ScreenManager.showMessage(screen, "You found the exit! Next level!");
 //            currentState = GameState.ENDGAME_SCREEN; // уточнить !!!
             world.initNewLevel();
+            world.setLevelNumber(world.getLevelNumber() + 1);
             resetGame();
         }
 
@@ -360,7 +361,7 @@ public class Controller {
     // Сброс исследованных клеток при новой игре
     private void resetGame() {
         Character player = world.getPlayer();
-        world.setLevelNumber(1);
+//        world.setLevelNumber(1);
         turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());
         // Сброс массива исследованных клеток
         for (int x = 0; x < WIDTH; x++) {

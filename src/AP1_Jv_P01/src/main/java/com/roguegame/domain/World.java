@@ -78,12 +78,12 @@ public class World {
             player.getBackpack().addItem(new Item(ItemTypes.Subtype.FOOD_SMALL, 0, 0));
             player.getBackpack().addItem(new Item(ItemTypes.Subtype.SWORD, 0, 0));
             player.getBackpack().addItem(new Item(ItemTypes.Subtype.MEDKIT_SMALL, 0, 0));
+            setLevelNumber(1);
         }
         player.getKeys().clear();
         items.clear();
         enemies.clear();
         LevelGenerator lg = new LevelGenerator(level);
-        setLevelNumber(levelNumber + 1);
         setItems(lg.generateLevelItems(levelNumber, struggleCounter));
         setEnemies(lg.generateLevelEnemies(levelNumber, struggleCounter, player));
         scaleEnemiesStrength(levelNumber, enemies);

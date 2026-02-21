@@ -8,7 +8,9 @@ import com.roguegame.domain.*;
 import com.roguegame.domain.Character;
 import com.roguegame.domain.DungeonLevel.Position;
 import com.roguegame.domain.GameMap.TileType;
-//import domain.LeaderboardService;
+import com.roguegame.domain.LeaderboardService;
+import com.roguegame.domain.ScoreEntry;
+import com.roguegame.datalayer.JsonLeaderboardService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -176,6 +178,8 @@ public class Controller {
             }
         } else if (key.getKeyType() == KeyType.Enter) {
             if (currentMenuLine == 0) { // NEW GAME
+                // фиксируем предыдущую попытку в лидерборде (если она была)
+                saveCurrentRunToLeaderboardIfNeeded();
                 currentState = GameState.GAME_SCREEN;
                 if (!world.getPlayer().isAlive()) {
                     world.initNewLevel();
@@ -482,5 +486,41 @@ public class Controller {
 
     public boolean isExplored(int x, int y) {
         return explored[x][y];
+    }
+    private final LeaderboardService leaderboardService = new JsonLeaderboardService();
+    private boolean runSaved = false;
+    public List<ScoreEntry> loadLeaderboard() {
+        List<ScoreEntry> scores = new ArrayList<>(leaderboardService.loadLeaderboard());
+        scores.sort((a, b) -> {
+            if (b.getTreasures() != a.getTreasures()) return Integer.compare(b.getTreasures(), a.getTreasures());
+            return Integer.compare(b.getLevel(), a.getLevel());
+        });
+        return scores;
+    }
+
+    /** Сохранить текущую попытку в таблицу лидеров (если попытка не пустая). */
+    public void saveCurrentRunToLeaderboardIfNeeded() {
+        Character player = world.getPlayer();
+        int lvl = world.getLevelNumber();
+
+        boolean hasProgress = player.getGold() > 0
+                || lvl > 1
+                || player.getEnemiesKilled() > 0
+                || foodUsed > 0 || elixirsUsed > 0 || scrollsUsed > 0 || movesMade > 0;
+
+        if (!hasProgress) return;
+
+        ScoreEntry entry = new ScoreEntry(
+                player.getGold(),
+                lvl,
+                player.getEnemiesKilled(),
+                foodUsed,
+                elixirsUsed,
+                scrollsUsed,
+                player.getAttacksLanded(),
+                player.getAttacksMissed(),
+                movesMade
+        );
+        leaderboardService.saveScore(entry);
     }
 }

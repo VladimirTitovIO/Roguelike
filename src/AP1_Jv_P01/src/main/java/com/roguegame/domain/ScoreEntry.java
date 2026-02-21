@@ -36,4 +36,14 @@ public class ScoreEntry {
     public int getAttacksMade() { return attacksMade; }
     public int getAttacksMissed() { return attacksMissed; }
     public int getMovesMade() { return movesMade; }
+
+    public void setTreasures(int treasures) { this.treasures = treasures; }
+    public void setLevel(int level) { this.level = level; }
+    public void setEnemiesKilled(int enemiesKilled) { this.enemiesKilled = enemiesKilled; }
+    public void setFoodUsed(int foodUsed) { this.foodUsed = foodUsed; }
+    public void setElixirsUsed(int elixirsUsed) { this.elixirsUsed = elixirsUsed; }
+    public void setScrollsUsed(int scrollsUsed) { this.scrollsUsed = scrollsUsed; }
+    public void setAttacksMade(int attacksMade) { this.attacksMade = attacksMade; }
+    public void setAttacksMissed(int attacksMissed) { this.attacksMissed = attacksMissed; }
+    public void setMovesMade(int movesMade) { this.movesMade = movesMade; }
 }

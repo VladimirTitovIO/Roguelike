@@ -126,6 +126,7 @@ public class Presentation {
                 controller.setCurrentState(Controller.GameState.ENDGAME_SCREEN);
             }
             player.tickBuffs();
+            controller.getWorld().calculateStruggle();
         }
     }
 

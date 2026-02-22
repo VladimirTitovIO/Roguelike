@@ -273,7 +273,7 @@ public class World {
         double difficulty = 1.0 - ratio;
         //not to drop instantly to easiest struggle
         double smoothing = 0.1;
-        struggleCounter += (difficulty - ratio) * smoothing;
+        struggleCounter += (difficulty - struggleCounter) * smoothing;
         struggleCounter = Math.max(0.0, Math.min(1.0, struggleCounter));
     }
 

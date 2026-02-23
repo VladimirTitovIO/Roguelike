@@ -80,6 +80,56 @@ public class ItemTypes {
         SCROLLS_AGILITY(ItemTypes.Type.SCROLLS, 0, 0, 3, 0, 0, 4),
         SCROLLS_MAX_HEALTH(ItemTypes.Type.SCROLLS, 0, 10, 0, 0, 0, 2);
 
+        public static final Subtype[] LOW_STRUGGLE = {
+            TREASURE_SMALL,
+            TREASURE_BIG,
+            TREASURE_MEDIUM,
+            ELIXIR_STRENGTH,
+            ELIXIR_AGILITY,
+            ELIXIR_MAX_HEALTH,
+            SCROLLS_AGILITY,
+            FOOD_SMALL,
+            FOOD_MEDIUM,
+            MEDKIT_SMALL,
+            SWORD,
+            MACE
+        };
+
+        public static final Subtype[] HIGH_STRUGGLE = {
+          MEDKIT_SMALL,
+          MEDKIT_BIG,
+          MEDKIT_MEDIUM,
+          FOOD_BIG,
+          FOOD_MEDIUM,
+          SCROLLS_STRENGTH,
+          SCROLLS_MAX_HEALTH,
+          AXE,
+          MACE,
+          ELIXIR_STRENGTH,
+          ELIXIR_MAX_HEALTH
+        };
+
+        public static final Subtype[] BALANCED_STRUGGLE = {
+          MEDKIT_SMALL,
+          MEDKIT_MEDIUM,
+          MEDKIT_BIG,
+          TREASURE_SMALL,
+          TREASURE_BIG,
+          TREASURE_MEDIUM,
+          ELIXIR_AGILITY,
+          ELIXIR_MAX_HEALTH,
+          ELIXIR_STRENGTH,
+          FOOD_SMALL,
+          FOOD_MEDIUM,
+          FOOD_BIG,
+          SCROLLS_AGILITY,
+          SCROLLS_STRENGTH,
+          SCROLLS_MAX_HEALTH,
+          SWORD,
+          MACE,
+          AXE
+        };
+
         private final ItemTypes.Type type;
         private final int maximumHealth;
         private final int agility;

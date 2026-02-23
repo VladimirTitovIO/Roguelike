@@ -1,6 +1,7 @@
 package com.roguegame.domain;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -19,46 +20,44 @@ public class LevelGenerator {
     public List<Item> generateLevelItems(int level, double struggleCounter) {
         List<Item> itemsAtLevel = new ArrayList<>();
         List<ItemTypes.Subtype> pool = buildWeightedPool();
-        int baseItems = 9; //9 rooms
-        int extraItems = (int) Math.round(level * struggleCounter);
+        int baseItems = 5 + level / 3; //9 rooms
+//        int extraItems = (int) Math.round(level * struggleCounter);
+        int extraItems = (int) Math.round(3 + struggleCounter * 6);
         int totalItems = baseItems + extraItems;
-        for (ItemTypes.Type t : ItemTypes.Type.values()) {
-            if (struggleCounter < 0.35 && (t.equals(ItemTypes.Type.FOOD) || t.equals(ItemTypes.Type.MEDKIT))) continue;
-            itemsAtLevel.add(new Item(buildSubtypeByWeight(t, random), 0, 0));
-        }
-        if (struggleCounter > 0.65 && struggleCounter < 0.8) {
-            itemsAtLevel.add(new Item(buildSubtypeByWeight(ItemTypes.Type.FOOD, random), 0, 0));
-            itemsAtLevel.add(new Item(buildSubtypeByWeight(ItemTypes.Type.FOOD, random), 0, 0));
-        } else if (struggleCounter > 0.8) {
-            itemsAtLevel.add(new Item(buildSubtypeByWeight(ItemTypes.Type.MEDKIT, random), 0, 0));
-            itemsAtLevel.add(new Item(buildSubtypeByWeight(ItemTypes.Type.MEDKIT, random), 0, 0));
+        for (int i = 0; i < totalItems; i++) {
+            if (struggleCounter > 0.7) {
+                itemsAtLevel.add(new Item(buildSubtypeByWeight2(ItemTypes.Subtype.HIGH_STRUGGLE, random), 0, 0));
+            }
+            else if (struggleCounter < 0.3) {
+                itemsAtLevel.add(new Item(buildSubtypeByWeight2(ItemTypes.Subtype.LOW_STRUGGLE, random), 0, 0));
+            }
+            else {
+                itemsAtLevel.add(new Item(buildSubtypeByWeight2(ItemTypes.Subtype.BALANCED_STRUGGLE, random), 0, 0));
+            }
         }
         for (Item i : itemsAtLevel) {
             int room = random.nextInt(0, 9);
             i.setPosX(getLevel().getRandomRoomX(room));
             i.setPosY(getLevel().getRandomRoomY(room));
         }
-        for (int i = 0; i < totalItems - itemsAtLevel.size(); i++) {
-            int room = random.nextInt(0, 9);
-            itemsAtLevel.add(new Item(pool.get(random.nextInt(pool.size()))
-                    ,getLevel().getRandomRoomX(room), getLevel().getRandomRoomY(room)));
-        }
         return itemsAtLevel;
     }
 
-    public ItemTypes.Subtype buildSubtypeByWeight(ItemTypes.Type type, Random random) {
-        List<ItemTypes.Subtype> list = new ArrayList<>();
-        for (ItemTypes.Subtype s : ItemTypes.Subtype.values()) {
-            if (s == ItemTypes.Subtype.FISTS) continue;
-            if (s.getType() == type) list.add(s);
+    public ItemTypes.Subtype buildSubtypeByWeight2(ItemTypes.Subtype[] subtype, Random random) {
+        int totalWeight = 0;
+        for (ItemTypes.Subtype s : subtype) {
+            totalWeight += s.getWeight();
         }
-        int totalWeight = list.stream().mapToInt(ItemTypes.Subtype::getWeight).sum();
         int roll = random.nextInt(totalWeight);
-        for (ItemTypes.Subtype s : list) {
-            roll -= s.getWeight();
-            if (roll < 0) return s;
+        int itemWeight = 0;
+        for (ItemTypes.Subtype s : subtype) {
+            itemWeight += s.getWeight();
+            if (roll < itemWeight) {
+                return s;
+            }
         }
-        throw new IllegalStateException("weight failed");
+        return subtype[0];
+
     }
 
     private List<ItemTypes.Subtype> buildWeightedPool() {

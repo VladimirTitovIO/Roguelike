@@ -25,7 +25,7 @@ java {
 }
 
 application {
-    mainClass.set("presentation.Main")
+    mainClass.set("com/roguegame/presentation/Presentation")
 }
 
 tasks.test {

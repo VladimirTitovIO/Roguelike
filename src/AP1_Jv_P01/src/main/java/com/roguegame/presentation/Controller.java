@@ -3,7 +3,6 @@ package com.roguegame.presentation;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
-import com.googlecode.lanterna.terminal.swing.ScrollingSwingTerminal;
 import com.roguegame.domain.*;
 import com.roguegame.domain.Character;
 import com.roguegame.domain.DungeonLevel.Position;
@@ -103,11 +102,10 @@ public class Controller {
     private Map<Position, Item> itemMap;
 
 
-    // Инвентарь (временный хардкод)
+    // Инвентарь
     private static boolean showingMenu = false;
     private static String currentMenuType = "";
     private List<Item> currentMenuItems = new ArrayList<>();
-    //private static LeaderboardService leaderboardService = new FileLeaderboardService(); // Реализация разработчика А
 
     // Исследованные клетки (для тумана войны)
     private boolean[][] explored = new boolean[WIDTH][HEIGHT];
@@ -130,9 +128,11 @@ public class Controller {
     public void handleInput(KeyStroke key, Screen screen) throws IOException {
         // Обработка ESC для возврата в меню из любого состояния, кроме START_SCREEN и меню выбора инвентаря
         if (key.getKeyType() == KeyType.Escape && currentState != GameState.START_SCREEN && !showingMenu) {
-            if (currentState == GameState.GAME_SCREEN) { saveGameService.save(world, movesMade); }
+            if (currentState == GameState.GAME_SCREEN) {
+                saveGameService.save(world, movesMade);
+            }
             currentState = GameState.MENU_SCREEN;
-            return; // Прерываем дальнейшую обработку
+            return;
         }
         switch (currentState) {
             case START_SCREEN, DEAD_SCREEN, ENDGAME_SCREEN:
@@ -375,6 +375,7 @@ public class Controller {
         scrollsUsed = 0;
         movesMade = 0;
     }
+
     // Сброс исследованных клеток при новой игре
     private void resetGame() {
         Character player = world.getPlayer();
@@ -506,12 +507,13 @@ public class Controller {
     public boolean isExplored(int x, int y) {
         return explored[x][y];
     }
+
     private final LeaderboardService leaderboardService = new JsonLeaderboardService();
     private boolean runSaved = false;
 
     /**
      * Сохраняет текущую попытку в лидерборд ОДИН РАЗ.
-     * Вызывай из Presentation в момент смерти или победы (перед переключением экрана).
+     * Вызывается из Presentation в момент смерти или победы (перед переключением экрана).
      */
     public void onRunEnded() {
         if (runSaved) return;
@@ -528,7 +530,9 @@ public class Controller {
         return scores;
     }
 
-    /** Сохранить текущую попытку в таблицу лидеров (если попытка не пустая). */
+    /**
+     * Сохранить текущую попытку в таблицу лидеров (если попытка не пустая).
+     */
     public void saveCurrentRunToLeaderboardIfNeeded() {
         Character player = world.getPlayer();
         int lvl = world.getLevelNumber();
@@ -573,9 +577,11 @@ public class Controller {
 
         leaderboardService.saveScore(entry);
     }
+
     public void clearSaveGame() {
         saveGameService.clear();
     }
+
     public void loadGame() {
         saveGameService.loadInto(world).ifPresent(moves -> {
             this.movesMade = moves;
@@ -583,8 +589,6 @@ public class Controller {
             this.turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());
             // Перестроить карты для рендера
             rebuildMaps();
-
-
         });
     }
 }

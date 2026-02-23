@@ -6,10 +6,8 @@ import com.googlecode.lanterna.screen.Screen;
 import com.roguegame.domain.*;
 import com.roguegame.domain.Character;
 
-
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Отрисовка всех экранов: старт, меню, победа, поражение, рекорды, игра.
@@ -19,14 +17,11 @@ import java.util.stream.Collectors;
 
 public class ScreenManager {
 
-    /* --------------------------  константы  -------------------------- */
-    public static final int LEVEL_WIDTH = DungeonLevel.WIDTH;
+    // константы
     public static final int LEVEL_HEIGHT = DungeonLevel.HEIGHT;
     public static final int TERMINAL_WIDTH = Presentation.TERMINAL_WIDTH;
     public static final int TERMINAL_HEIGHT = Presentation.TERMINAL_HEIGHT;
 
-
-    /* ----------------------  публичный high-level API  --------------- */
     // полноэкранные сообщения (старт/победа/поражение)
     public static void renderFullscreenMessage(Screen screen, MessageType type) throws IOException {
         screen.clear();
@@ -35,13 +30,11 @@ public class ScreenManager {
 
         MessageDesc desc = buildMessageDesc(type);
 
-        // рисуем ASCII-арт, центрированный в верхней части экрана
+        // ASCII-арт, центрированный в верхней части экрана
         drawAsciiArtCentered(graphics, desc.art(), desc.color(), 0, 0, TERMINAL_WIDTH, 24);
-
 
         // подсказка
         drawStringCentered(TextColor.ANSI.WHITE, graphics, desc.prompt(), 0, TERMINAL_HEIGHT - 15, TERMINAL_WIDTH);
-
 
         screen.refresh();
     }
@@ -75,7 +68,7 @@ public class ScreenManager {
         int boxX = (TERMINAL_WIDTH - " <<<SCOREBOARD>>> ".length()) / 2;
         int boxY = 6;
         int boxW = "<<<SCOREBOARD>>>".length() + 2;
-            int boxH = 8;
+        int boxH = 8;
         drawBox(graphics, boxX, boxY, boxW, boxH,
                 TextColor.ANSI.WHITE, TextColor.ANSI.BLACK);
 
@@ -128,12 +121,8 @@ public class ScreenManager {
         int startX = 5;
         int startY = 5;
 
-        // заголовок
         drawStringCentered(TextColor.ANSI.GREEN, g, "=== SCOREBOARD ===", 0, startY, TERMINAL_WIDTH);
-
-        // подготовим данные для универсальной drawTable
-        String[] headers = {"Treasures", "Level", "Enemies", "Food",
-                "Elixirs", "Scrolls", "Attacks", "Missed", "Moves"};
+        String[] headers = {"Treasures", "Level", "Enemies", "Food", "Elixirs", "Scrolls", "Attacks", "Missed", "Moves"};
         List<String[]> rows = scores.stream()
                 .limit(10)
                 .map(se -> new String[]{
@@ -154,11 +143,10 @@ public class ScreenManager {
         // подсказка
         drawStringCentered(TextColor.ANSI.WHITE, g, "Press ESCAPE to exit", 0, startY + 25, TERMINAL_WIDTH);
 
-
         screen.refresh();
     }
 
-    // короткое всплывающее сообщение
+    // Короткое всплывающее сообщение
     public static void showMessage(Screen screen, String message) {
         try {
             TextGraphics g = screen.newTextGraphics();
@@ -170,8 +158,6 @@ public class ScreenManager {
             e.printStackTrace();
         }
     }
-
-    /* --------------------  приватные low-level рисовалки  -------------------- */
 
     // Рамка
     private static void drawBox(TextGraphics graphics, int boxX, int boxY, int width, int height,
@@ -205,7 +191,6 @@ public class ScreenManager {
             g.putString(startX, startY + i, lines[i]);
         }
     }
-
 
     // Одна строка по центру
     private static void drawStringCentered(TextColor.ANSI color, TextGraphics g, String text,
@@ -264,18 +249,17 @@ public class ScreenManager {
         g.putString(menuX, menuY, hint);
     }
 
-    // описываем арт-набор для каждого типа сообщений
+    // арт-набор для каждого типа сообщений
     private record MessageDesc(String[] art, TextColor color, String prompt) {
     }
 
     private static MessageDesc buildMessageDesc(MessageType type) {
         return switch (type) {
-            case START -> new MessageDesc(START_ART, TextColor.ANSI.GREEN,
-                    "Press any key to continue");
-            case VICTORY -> new MessageDesc(VICTORY_ART, TextColor.ANSI.GREEN,
-                    "Congratulations! Press any key to continue");
-                case DEFEAT -> new MessageDesc(DEFEAT_ART, TextColor.ANSI.RED,
-                        "You have fallen. Press any key to continue");
+            case START -> new MessageDesc(START_ART, TextColor.ANSI.GREEN, "Press any key to continue");
+            case VICTORY ->
+                    new MessageDesc(VICTORY_ART, TextColor.ANSI.GREEN, "Congratulations! Press any key to continue");
+            case DEFEAT ->
+                    new MessageDesc(DEFEAT_ART, TextColor.ANSI.RED, "You have fallen. Press any key to continue");
         };
     }
 

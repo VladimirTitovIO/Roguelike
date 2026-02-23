@@ -19,7 +19,7 @@ public class GameRenderer {
     public static final int LEVEL_HEIGHT = DungeonLevel.HEIGHT;
 
     /**
-     * Отрисовывает игровую карту с учётом видимости и освещённости.
+     * Отрисовывает игровую карту с учётом видимости
      */
     public static void renderMap(TextGraphics g, Controller controller) {
         for (int y = 0; y < LEVEL_HEIGHT; y++) {
@@ -27,7 +27,6 @@ public class GameRenderer {
                 TileType tile = controller.getLevel().getTile(x, y);
                 boolean isSeen = controller.isExplored(x, y);
                 boolean isVisibleNow = controller.isCurrentlyVisible(x, y);
-
                 renderTile(g, tile, x, y, isSeen, isVisibleNow, controller);
             }
         }
@@ -65,7 +64,6 @@ public class GameRenderer {
             drawItem(g, item);
             return;
         }
-
         drawTile(g, tile, x, y, controller);
     }
 

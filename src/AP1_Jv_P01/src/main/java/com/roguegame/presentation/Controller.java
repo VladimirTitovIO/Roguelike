@@ -191,6 +191,7 @@ public class Controller {
                 this.runSaved = false;
                 // пересчитываем порядок ходов
                 this.turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());
+                resetStats();
                 resetGame();
                 currentState = GameState.GAME_SCREEN;
             } else if (currentMenuLine == 1) { // LOAD GAME
@@ -366,14 +367,16 @@ public class Controller {
         }
     }
 
-    // Сброс исследованных клеток при новой игре
-    private void resetGame() {
+    private void resetStats() {
         // Сброс статистики попытки и флага сохранения
         runSaved = false;
         foodUsed = 0;
         elixirsUsed = 0;
         scrollsUsed = 0;
         movesMade = 0;
+    }
+    // Сброс исследованных клеток при новой игре
+    private void resetGame() {
         Character player = world.getPlayer();
 //        world.setLevelNumber(1);
         turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());

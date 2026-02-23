@@ -61,6 +61,9 @@ public class Backpack {
         }
         return false;
     }
+    public void clear() {
+        items.clear();
+    }
 
 
 }

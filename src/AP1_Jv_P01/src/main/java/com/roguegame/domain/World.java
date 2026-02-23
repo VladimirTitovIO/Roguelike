@@ -39,6 +39,7 @@ public class World {
 
     public void setLevel(DungeonLevel level) {
         this.level = level;
+        this.keys = level.getKeysOnGround();
     }
 
     public Map<DungeonLevel.Position, DungeonLevel.DoorColor> getKeys() {

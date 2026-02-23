@@ -506,6 +506,27 @@ public class DungeonLevel implements GameMap {
         return Collections.unmodifiableMap(keysOnGround);
     }
 
+    public void loadFromSave(
+            TileType[][] newTiles,
+            Position newStart,
+            Position newExit,
+            Map<Position, Door> newDoors,
+            Map<Position, DoorColor> newKeysOnGround
+    ) {
+        this.tiles = newTiles;
+        this.startPosition = newStart;
+        this.exitPosition = newExit;
+
+        this.doors.clear();
+        this.doors.putAll(newDoors);
+
+        this.keysOnGround.clear();
+        this.keysOnGround.putAll(newKeysOnGround);
+
+        this.doorPositions.clear();
+        this.doorPositions.addAll(newDoors.keySet());
+    }
+
     public Optional<DoorColor> pickupKeyAt(int x, int y) {
         DoorColor c = keysOnGround.remove(new Position(x, y));
         return Optional.ofNullable(c);

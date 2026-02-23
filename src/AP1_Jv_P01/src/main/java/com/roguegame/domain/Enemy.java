@@ -217,12 +217,28 @@ public class Enemy extends Entity {
 
 
     public boolean ghostTeleport(Enemy e, World w) {
+
         int roomNum = w.getLevel().getRoomAt(e.getPosX(), e.getPosY());
+
+        // ✅ Если призрак не в комнате — выбираем случайную комнату
+        if (roomNum < 0) {
+            roomNum = new Random().nextInt(DungeonLevel.getRoomsNumber());
+        }
+
         for (int i = 0; i < MAX_TRIES_TO_MOVE; i++) {
             int x = w.getLevel().getRandomRoomX(roomNum);
             int y = w.getLevel().getRandomRoomY(roomNum);
+
             if (w.tryToTeleport(e, x, y)) return true;
         }
+
+        // ✅ Фолбэк: случайная walkable клетка на карте
+        for (int i = 0; i < 500; i++) {
+            int x = new Random().nextInt(w.getLevel().getWidth());
+            int y = new Random().nextInt(w.getLevel().getHeight());
+            if (w.getLevel().isWalkable(x, y) && w.tryToTeleport(e, x, y)) return true;
+        }
+
         return false;
     }
 

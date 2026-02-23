@@ -11,6 +11,7 @@ import com.roguegame.domain.GameMap.TileType;
 import com.roguegame.domain.LeaderboardService;
 import com.roguegame.domain.ScoreEntry;
 import com.roguegame.datalayer.JsonLeaderboardService;
+import com.roguegame.datalayer.SaveGameService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,6 +67,8 @@ public class Controller {
         return movesMade;
     }
 
+    private final SaveGameService saveGameService = new SaveGameService();
+
     public void setMovesMade(int movesMade) {
         this.movesMade = movesMade;
     }
@@ -93,7 +96,7 @@ public class Controller {
     private int medkitsUsed = 0;
     private int movesMade = 0;
     private List<Entity> turnOrder;
-    private final World world;
+    private World world;
     private GameState currentState = GameState.START_SCREEN;
     private int currentMenuLine = 0;
     private Map<Position, Enemy> enemyMap;
@@ -127,6 +130,7 @@ public class Controller {
     public void handleInput(KeyStroke key, Screen screen) throws IOException {
         // Обработка ESC для возврата в меню из любого состояния, кроме START_SCREEN и меню выбора инвентаря
         if (key.getKeyType() == KeyType.Escape && currentState != GameState.START_SCREEN && !showingMenu) {
+            if (currentState == GameState.GAME_SCREEN) { saveGameService.save(world, movesMade); }
             currentState = GameState.MENU_SCREEN;
             return; // Прерываем дальнейшую обработку
         }
@@ -181,13 +185,17 @@ public class Controller {
             }
         } else if (key.getKeyType() == KeyType.Enter) {
             if (currentMenuLine == 0) { // NEW GAME
-                currentState = GameState.GAME_SCREEN;
-                if (!world.getPlayer().isAlive()) {
-                    world.initNewLevel();
-                }
+                // создаём полностью новый мир
+                this.world = new World();
+                // сбрасываем попытку
+                this.runSaved = false;
+                // пересчитываем порядок ходов
+                this.turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());
                 resetGame();
+                currentState = GameState.GAME_SCREEN;
             } else if (currentMenuLine == 1) { // LOAD GAME
-                //currentState = GameState.
+                loadGame();
+                currentState = GameState.GAME_SCREEN;
             } else if (currentMenuLine == 2) { // SCOREBOARD
                 currentState = GameState.SCOREBOARD_SCREEN;
             } else if (currentMenuLine == 3) { // EXIT
@@ -255,6 +263,7 @@ public class Controller {
         if (world.getPlayer().getPosX() == world.getLevel().getExitPosition().x &&
                 world.getPlayer().getPosY() == world.getLevel().getExitPosition().y) {
             ScreenManager.showMessage(screen, "You found the exit! Next level!");
+            saveGameService.save(world, movesMade);
             world.initNewLevel();
             world.setLevelNumber(world.getLevelNumber() + 1);
             resetGame();
@@ -545,7 +554,6 @@ public class Controller {
 
         if (!hasProgress) return;
 
-        // ⚠️ Treasures:
         // Если хочешь, чтобы в колонке Treasures было как в Backpack (штучки), ставим treasuresInBag.
         // Если хочешь, чтобы там был Gold (как раньше) — замени treasuresInBag на player.getGold().
         ScoreEntry entry = new ScoreEntry(
@@ -561,5 +569,19 @@ public class Controller {
         );
 
         leaderboardService.saveScore(entry);
+    }
+    public void clearSaveGame() {
+        saveGameService.clear();
+    }
+    public void loadGame() {
+        saveGameService.loadInto(world).ifPresent(moves -> {
+            this.movesMade = moves;
+            // Пересчитать порядок ходов
+            this.turnOrder = world.calculateTurn(world.getPlayer(), world.getEnemies());
+            // Перестроить карты для рендера
+            rebuildMaps();
+
+
+        });
     }
 }

@@ -94,9 +94,11 @@ public class Presentation {
                     break;
                 case DEAD_SCREEN:
                     ScreenManager.renderDefeatScreen(screen);
+                    controller.clearSaveGame();
                     break;
                 case ENDGAME_SCREEN:
                     ScreenManager.renderVictoryScreen(screen);
+                    controller.clearSaveGame();
                     break;
             }
 
@@ -119,6 +121,7 @@ public class Presentation {
                 if (!controller.getPlayer().isAlive()) {
                     controller.onRunEnded();
                     controller.setCurrentState(Controller.GameState.DEAD_SCREEN);
+                    controller.clearSaveGame();
                 }
             }
             if (controller.getWorld().getLevelNumber() >= 21) {

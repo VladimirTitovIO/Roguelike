@@ -48,7 +48,7 @@ public abstract class Entity {
         this.speed = speed;
     }
 
-    protected void setAgility(int agility) {
+    public void setAgility(int agility) {
         this.agility =
                 agility;
     }
